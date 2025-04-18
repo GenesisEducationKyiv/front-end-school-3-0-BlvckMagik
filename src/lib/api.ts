@@ -31,4 +31,10 @@ export const trackApi = {
       maxBodyLength: Infinity,
     });
   },
+  getAudioFile: async (fileName: string) => {
+    const response = await api.get(`/files/${fileName}`, {
+      responseType: "blob",
+    });
+    return URL.createObjectURL(response.data);
+  },
 };

@@ -57,8 +57,8 @@ export default function TrackList({ initialTracks }: TrackListProps) {
             <button
               key={i + 1}
               onClick={() => handlePageChange(i + 1)}
-              className={`px-3 py-1 rounded ${
-                page === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200"
+              className={`px-3 py-1 rounded cursor-pointer text-gray-800 ${
+                page === i + 1 ? "bg-blue-500" : "bg-gray-200"
               }`}
             >
               {i + 1}
