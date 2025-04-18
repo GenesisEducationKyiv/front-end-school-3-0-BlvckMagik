@@ -35,7 +35,7 @@ export default function TrackItem({ track }: TrackItemProps) {
           track: {
             title: track.title,
             artist: track.artist,
-            coverImage: track.coverImage,
+            coverImage: track.coverImage || "/default-cover.webp",
             id: track.id,
           },
         });

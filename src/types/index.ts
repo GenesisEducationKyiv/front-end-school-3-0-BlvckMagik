@@ -2,21 +2,26 @@ export interface Track {
   id: string;
   title: string;
   artist: string;
-  album: string;
+  album?: string;
+  coverImage?: string;
   genres: string[];
-  slug: string;
-  coverImage: string;
-  audioFile: string;
-  createdAt: string;
-  updatedAt: string;
+  audioFile?: string;
+}
+
+export interface CreateTrackDto {
+  title: string;
+  artist: string;
+  album?: string;
+  coverImage?: string;
+  genres: string[];
 }
 
 export interface TrackFormData {
   title: string;
   artist: string;
-  album: string;
-  genres: string[];
+  album?: string;
   coverImage?: string;
+  genres: string[];
 }
 
 export interface PaginationMeta {

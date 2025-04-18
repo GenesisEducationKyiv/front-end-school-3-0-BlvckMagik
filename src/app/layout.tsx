@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import QueryProvider from "@/providers/QueryProvider";
 import "@/app/globals.css";
 import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
-
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist",
-});
 
 export const metadata: Metadata = {
   title: "Music App",

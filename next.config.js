@@ -6,7 +6,16 @@ const nextConfig = {
     },
   },
   images: {
-    domains: ["localhost", "picsum.photos"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
   },
 };
 

@@ -8,7 +8,7 @@ interface AudioPlayerProps {
   track: {
     title: string;
     artist: string;
-    coverImage: string;
+    coverImage?: string;
     id: string;
   };
   isPlaying: boolean;

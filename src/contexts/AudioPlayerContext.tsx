@@ -9,7 +9,7 @@ interface AudioPlayerContextType {
     track: {
       title: string;
       artist: string;
-      coverImage: string;
+      coverImage?: string;
       id: string;
     };
   } | null;
