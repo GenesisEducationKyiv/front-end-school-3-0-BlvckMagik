@@ -2,7 +2,7 @@ import { getTracks } from "@/app/actions/tracks";
 import TrackList from "@/components/tracks/TrackList";
 
 export default async function TracksPage() {
-  const initialTracks = await getTracks();
+  const tracks = await getTracks();
 
   return (
     <div className="min-h-screen bg-background">
@@ -13,7 +13,7 @@ export default async function TracksPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <TrackList initialTracks={initialTracks} />
+        <TrackList initialTracks={tracks} />
       </main>
     </div>
   );
