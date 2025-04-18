@@ -6,7 +6,7 @@ import EditTrackModal from "@/components/tracks/EditTrackModal";
 import Image from "next/image";
 import { trackApi } from "@/lib/api";
 import { PlayIcon } from "@heroicons/react/24/solid";
-import AudioPlayer from "./AudioPlayer";
+import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 
 interface TrackItemProps {
   track: Track;
@@ -15,14 +15,21 @@ interface TrackItemProps {
 export default function TrackItem({ track }: TrackItemProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const { setCurrentTrack } = useAudioPlayer();
 
   const handlePlayClick = async () => {
-    if (track.audioFile && !audioUrl) {
+    if (track.audioFile) {
       setIsLoading(true);
       try {
         const url = await trackApi.getAudioFile(track.audioFile);
-        setAudioUrl(url);
+        setCurrentTrack({
+          audioUrl: url,
+          track: {
+            title: track.title,
+            artist: track.artist,
+            coverImage: track.coverImage,
+          },
+        });
       } catch (error) {
         console.error("Failed to load audio:", error);
       } finally {
@@ -67,16 +74,6 @@ export default function TrackItem({ track }: TrackItemProps) {
               <div className="h-8 flex items-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900" />
               </div>
-            ) : audioUrl ? (
-              <AudioPlayer
-                audioUrl={audioUrl}
-                track={{
-                  title: track.title,
-                  artist: track.artist,
-                  coverImage: track.coverImage,
-                }}
-                onClose={() => setAudioUrl(null)}
-              />
             ) : (
               <button
                 onClick={handlePlayClick}

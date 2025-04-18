@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import QueryProvider from "@/providers/QueryProvider";
 import "@/app/globals.css";
+import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -21,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="uk">
       <body className="min-h-screen bg-background font-sans antialiased">
-        {children}
+        <AudioPlayerProvider>{children}</AudioPlayerProvider>
       </body>
     </html>
   );

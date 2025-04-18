@@ -18,11 +18,12 @@ export default function AudioPlayer({
   track,
   onClose,
 }: AudioPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+  const mobileProgressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -59,6 +60,14 @@ export default function AudioPlayer({
     audioRef.current.currentTime = percent * duration;
   };
 
+  const handleMobileProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current || !mobileProgressRef.current) return;
+
+    const progressRect = mobileProgressRef.current.getBoundingClientRect();
+    const percent = (e.clientX - progressRect.left) / progressRect.width;
+    audioRef.current.currentTime = percent * duration;
+  };
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -66,10 +75,25 @@ export default function AudioPlayer({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-secondary border-t border-border/40 backdrop-blur-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-secondary backdrop-blur-lg">
+      {/* Мобільний прогрес-бар */}
+      <div
+        ref={mobileProgressRef}
+        className="md:hidden w-full h-1 bg-gray-600 cursor-pointer"
+        onClick={handleMobileProgressClick}
+      >
+        <div
+          className="h-full bg-white"
+          style={{ width: `${(currentTime / duration) * 100}%` }}
+        />
+      </div>
+
+      {/* Верхній бордер тільки для десктопу */}
+      <div className="hidden md:block border-t border-border/40" />
+
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 min-w-[200px]">
+          <div className="flex items-center gap-3">
             <img
               src={track.coverImage || "/default-cover.webp"}
               alt={track.title}
@@ -97,7 +121,8 @@ export default function AudioPlayer({
               </button>
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* Десктопний прогрес-бар */}
+            <div className="hidden md:flex items-center gap-2">
               <span className="text-sm text-gray-400 w-12 text-right">
                 {formatTime(currentTime)}
               </span>
