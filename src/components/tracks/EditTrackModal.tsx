@@ -41,6 +41,7 @@ export default function EditTrackModal({
       setIsSubmitting(true);
       await updateTrack(track.id, data);
       if (selectedFile) {
+        console.log("selectedFile", selectedFile);
         await uploadTrackFile(track.id, selectedFile);
       }
       onClose();

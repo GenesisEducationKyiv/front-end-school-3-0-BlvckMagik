@@ -1,17 +1,13 @@
 import { getTracks } from "@/app/actions/tracks";
 import TrackList from "@/components/tracks/TrackList";
+import Header from "@/components/layout/Header";
 
 export default async function TracksPage() {
   const initialTracks = await getTracks();
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold">Музична бібліотека</h1>
-        </div>
-      </header>
-
+    <div className="min-h-screen">
+      <Header />
       <main className="container mx-auto px-4 py-8">
         <TrackList initialTracks={initialTracks} />
       </main>

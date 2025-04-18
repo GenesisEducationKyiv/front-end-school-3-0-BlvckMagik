@@ -14,15 +14,21 @@ export const trackApi = {
   createTrack: async (data: CreateTrackDto) => {
     return api.post("/tracks", data);
   },
-  updateTrack: async (id: string, data: UpdateTrackDto) => {
-    return api.patch(`/tracks/${id}`, data);
+  updateTrack: async (id: string, data: TrackFormData) => {
+    return api.put(`/tracks/${id}`, data);
   },
   deleteTrack: async (id: string) => {
     return api.delete(`/tracks/${id}`);
   },
   uploadFile: async (id: string, file: File) => {
     const formData = new FormData();
-    formData.append("file", file);
-    return api.post(`/tracks/${id}/audio`, formData);
+    formData.append("audioFile", file);
+
+    return api.post(`/tracks/${id}/upload`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      maxBodyLength: Infinity,
+    });
   },
 };

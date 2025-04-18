@@ -34,18 +34,18 @@ export default function TrackList({ initialTracks }: TrackListProps) {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between mb-4">
+    <>
+      <div className="flex justify-between mb-8">
         <h1 className="text-2xl font-bold">Треки</h1>
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/90 transition-colors"
         >
           Створити трек
         </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="flex flex-col gap-8">
         {tracks?.data?.map((track) => (
           <TrackItem key={track.id} track={track} />
         )) || <div>Немає треків</div>}
@@ -71,6 +71,6 @@ export default function TrackList({ initialTracks }: TrackListProps) {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       />
-    </div>
+    </>
   );
 }
