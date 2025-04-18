@@ -10,8 +10,11 @@ interface AudioPlayerContextType {
       title: string;
       artist: string;
       coverImage: string;
+      id: string;
     };
   } | null;
+  isPlaying: boolean;
+  setIsPlaying: (isPlaying: boolean) => void;
   setCurrentTrack: (track: AudioPlayerContextType["currentTrack"]) => void;
 }
 
@@ -26,15 +29,23 @@ export function AudioPlayerProvider({
 }) {
   const [currentTrack, setCurrentTrack] =
     useState<AudioPlayerContextType["currentTrack"]>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <AudioPlayerContext.Provider value={{ currentTrack, setCurrentTrack }}>
+    <AudioPlayerContext.Provider
+      value={{ currentTrack, setCurrentTrack, isPlaying, setIsPlaying }}
+    >
       {children}
       {currentTrack && (
         <AudioPlayer
           audioUrl={currentTrack.audioUrl}
           track={currentTrack.track}
-          onClose={() => setCurrentTrack(null)}
+          isPlaying={isPlaying}
+          setIsPlaying={setIsPlaying}
+          onClose={() => {
+            setCurrentTrack(null);
+            setIsPlaying(false);
+          }}
         />
       )}
     </AudioPlayerContext.Provider>

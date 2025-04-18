@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { PlayIcon, PauseIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
 
 interface AudioPlayerProps {
   audioUrl: string;
@@ -9,16 +9,19 @@ interface AudioPlayerProps {
     title: string;
     artist: string;
     coverImage: string;
+    id: string;
   };
+  isPlaying: boolean;
+  setIsPlaying: (isPlaying: boolean) => void;
   onClose: () => void;
 }
 
 export default function AudioPlayer({
   audioUrl,
   track,
-  onClose,
+  isPlaying,
+  setIsPlaying,
 }: AudioPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -41,14 +44,17 @@ export default function AudioPlayer({
     };
   }, []);
 
-  const togglePlay = () => {
+  useEffect(() => {
     if (!audioRef.current) return;
 
     if (isPlaying) {
-      audioRef.current.pause();
-    } else {
       audioRef.current.play();
+    } else {
+      audioRef.current.pause();
     }
+  }, [isPlaying]);
+
+  const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
 
@@ -88,7 +94,6 @@ export default function AudioPlayer({
         />
       </div>
 
-      {/* Верхній бордер тільки для десктопу */}
       <div className="hidden md:block border-t border-border/40" />
 
       <div className="container mx-auto px-4 py-3">
@@ -108,7 +113,7 @@ export default function AudioPlayer({
           </div>
 
           <div className="flex-1 flex flex-col gap-1">
-            <div className="flex items-center gap-4 justify-center">
+            <div className="flex items-center gap-4 justify-end md:justify-center">
               <button
                 onClick={togglePlay}
                 className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/20 hover:bg-primary/30 transition-colors"
@@ -142,15 +147,6 @@ export default function AudioPlayer({
                 {formatTime(duration)}
               </span>
             </div>
-          </div>
-
-          <div className="min-w-[100px] flex justify-end">
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors p-2"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </button>
           </div>
         </div>
       </div>

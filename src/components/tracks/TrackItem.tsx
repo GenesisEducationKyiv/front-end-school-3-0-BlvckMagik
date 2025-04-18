@@ -5,7 +5,7 @@ import { Track } from "@/types";
 import EditTrackModal from "@/components/tracks/EditTrackModal";
 import Image from "next/image";
 import { trackApi } from "@/lib/api";
-import { PlayIcon } from "@heroicons/react/24/solid";
+import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 
 interface TrackItemProps {
@@ -15,9 +15,17 @@ interface TrackItemProps {
 export default function TrackItem({ track }: TrackItemProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { setCurrentTrack } = useAudioPlayer();
+  const { setCurrentTrack, currentTrack, isPlaying, setIsPlaying } =
+    useAudioPlayer();
+
+  const isCurrentTrack = currentTrack?.track.id === track.id;
 
   const handlePlayClick = async () => {
+    if (isCurrentTrack) {
+      setIsPlaying(!isPlaying);
+      return;
+    }
+
     if (track.audioFile) {
       setIsLoading(true);
       try {
@@ -28,8 +36,10 @@ export default function TrackItem({ track }: TrackItemProps) {
             title: track.title,
             artist: track.artist,
             coverImage: track.coverImage,
+            id: track.id,
           },
         });
+        setIsPlaying(true);
       } catch (error) {
         console.error("Failed to load audio:", error);
       } finally {
@@ -79,7 +89,11 @@ export default function TrackItem({ track }: TrackItemProps) {
                 onClick={handlePlayClick}
                 className="w-12 h-12 cursor-pointer rounded-full border-2 border-white bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-colors"
               >
-                <PlayIcon className="w-6 h-6 text-white" />
+                {isCurrentTrack && isPlaying ? (
+                  <PauseIcon className="w-6 h-6 text-white" />
+                ) : (
+                  <PlayIcon className="w-6 h-6 text-white" />
+                )}
               </button>
             )}
           </>
