@@ -70,6 +70,11 @@ export default function TrackItem({ track }: TrackItemProps) {
             ) : audioUrl ? (
               <AudioPlayer
                 audioUrl={audioUrl}
+                track={{
+                  title: track.title,
+                  artist: track.artist,
+                  coverImage: track.coverImage,
+                }}
                 onClose={() => setAudioUrl(null)}
               />
             ) : (
