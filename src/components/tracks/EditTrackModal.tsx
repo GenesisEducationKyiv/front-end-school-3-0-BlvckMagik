@@ -53,8 +53,8 @@ export default function EditTrackModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-zinc-900 rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Редагувати трек</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -126,11 +126,6 @@ export default function EditTrackModal({
               onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
               className="w-full border rounded p-2"
             />
-            {track.audioFile && (
-              <audio controls className="mt-2 w-full">
-                <source src={track.audioFile} type="audio/mpeg" />
-              </audio>
-            )}
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
