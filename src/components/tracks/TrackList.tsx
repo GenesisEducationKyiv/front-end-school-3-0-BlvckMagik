@@ -5,16 +5,17 @@ import { Track, PaginatedResponse } from "@/types";
 import { getTracks } from "@/app/actions/tracks";
 import TrackItem from "@/components/tracks/TrackItem";
 import CreateTrackModal from "@/components/tracks/CreateTrackModal";
+import { useTracks } from "@/contexts/TracksContext";
 
 interface TrackListProps {
   initialTracks: PaginatedResponse<Track>;
 }
 
 export default function TrackList({ initialTracks }: TrackListProps) {
-  const [tracks, setTracks] = useState<PaginatedResponse<Track>>(initialTracks);
   const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { tracks, setTracks } = useTracks();
 
   const handlePageChange = async (newPage: number) => {
     try {

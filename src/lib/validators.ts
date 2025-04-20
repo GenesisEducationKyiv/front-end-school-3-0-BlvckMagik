@@ -5,7 +5,11 @@ export const trackFormSchema = z.object({
   artist: z.string().min(1, "Ім'я виконавця обов'язкове"),
   album: z.string().optional(),
   genres: z.array(z.string()).min(1, "Оберіть хоча б один жанр"),
-  coverUrl: z.string().url("Невірний формат URL").optional().or(z.literal("")),
+  coverImage: z
+    .string()
+    .url("Невірний формат URL")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type TrackFormValues = z.infer<typeof trackFormSchema>;

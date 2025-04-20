@@ -8,6 +8,8 @@ import { trackApi } from "@/lib/api";
 import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import TrackDetailsModal from "@/components/tracks/TrackDetailsModal";
+import { useTracks } from "@/contexts/TracksContext";
 
 interface TrackItemProps {
   track: Track;
@@ -17,9 +19,11 @@ export default function TrackItem({ track }: TrackItemProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { setCurrentTrack, currentTrack, isPlaying, setIsPlaying } =
     useAudioPlayer();
+  const { updateTrack, deleteTrack } = useTracks();
 
   const isCurrentTrack = currentTrack?.track.id === track.id;
 
@@ -66,11 +70,13 @@ export default function TrackItem({ track }: TrackItemProps) {
 
   const handleDelete = async () => {
     if (confirm("Ви впевнені, що хочете видалити цей трек?")) {
+      deleteTrack(track.id);
+
       try {
         await trackApi.deleteTrack(track.id);
-        // Тут можна додати оновлення списку треків
       } catch (error) {
         console.error("Failed to delete track:", error);
+        window.location.reload();
       }
     }
     setIsMenuOpen(false);
@@ -153,6 +159,15 @@ export default function TrackItem({ track }: TrackItemProps) {
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1">
               <button
                 onClick={() => {
+                  setIsDetailsModalOpen(true);
+                  setIsMenuOpen(false);
+                }}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-black transition-colors"
+              >
+                Деталі
+              </button>
+              <button
+                onClick={() => {
                   setIsEditModalOpen(true);
                   setIsMenuOpen(false);
                 }}
@@ -174,6 +189,12 @@ export default function TrackItem({ track }: TrackItemProps) {
       <EditTrackModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
+        track={track}
+      />
+
+      <TrackDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
         track={track}
       />
     </div>

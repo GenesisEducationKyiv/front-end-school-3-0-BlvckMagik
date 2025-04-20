@@ -5,7 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TrackFormData } from "@/types";
 import { trackFormSchema } from "@/lib/validators";
-import { createTrack, uploadTrackFile } from "@/app/actions/tracks";
+import { uploadTrackFile } from "@/app/actions/tracks";
+import { useTracks } from "@/contexts/TracksContext";
+import { trackApi } from "@/lib/api";
 
 interface CreateTrackModalProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ export default function CreateTrackModal({
 }: CreateTrackModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addTrack } = useTracks();
 
   const {
     register,
@@ -38,12 +41,22 @@ export default function CreateTrackModal({
   const onSubmit = async (data: TrackFormData) => {
     try {
       setIsSubmitting(true);
-      const track = await createTrack(data);
-      if (selectedFile && track.id) {
-        await uploadTrackFile(track.id, selectedFile);
+
+      const response = await trackApi.createTrack(data);
+      const newTrack = response.data;
+
+      // Оптимістичне оновлення
+      addTrack(newTrack);
+
+      if (selectedFile) {
+        await uploadTrackFile(newTrack.id, selectedFile);
       }
       reset();
       onClose();
+    } catch (error) {
+      console.error("Failed to create track:", error);
+      // Відновлюємо стан при помилці
+      window.location.reload();
     } finally {
       setIsSubmitting(false);
     }

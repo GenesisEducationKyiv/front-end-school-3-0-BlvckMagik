@@ -5,7 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Track, TrackFormData } from "@/types";
 import { trackFormSchema } from "@/lib/validators";
-import { updateTrack, uploadTrackFile } from "@/app/actions/tracks";
+import { uploadTrackFile } from "@/app/actions/tracks";
+import { useTracks } from "@/contexts/TracksContext";
+import { trackApi } from "@/lib/api";
 
 interface EditTrackModalProps {
   isOpen: boolean;
@@ -20,6 +22,7 @@ export default function EditTrackModal({
 }: EditTrackModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { updateTrack } = useTracks();
 
   const {
     register,
@@ -32,19 +35,31 @@ export default function EditTrackModal({
       artist: track.artist,
       album: track.album,
       genres: track.genres,
-      coverImage: track.coverImage,
+      coverImage: track.coverImage || "",
     },
   });
 
   const onSubmit = async (data: TrackFormData) => {
     try {
       setIsSubmitting(true);
-      await updateTrack(track.id, data);
+
+      const formData = {
+        ...data,
+        coverImage: data.coverImage || "",
+      };
+
+      const response = await trackApi.updateTrack(track.id, formData);
+      const updatedTrack = response.data;
+
+      updateTrack(updatedTrack);
+
       if (selectedFile) {
-        console.log("selectedFile", selectedFile);
         await uploadTrackFile(track.id, selectedFile);
       }
       onClose();
+    } catch (error) {
+      console.error("Failed to update track:", error);
+      window.location.reload();
     } finally {
       setIsSubmitting(false);
     }
@@ -92,6 +107,7 @@ export default function EditTrackModal({
             <label className="block mb-1">Обкладинка (URL)</label>
             <input
               {...register("coverImage")}
+              placeholder="Введіть URL обкладинки"
               className="w-full border rounded p-2"
             />
             {errors.coverImage && (
