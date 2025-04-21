@@ -9,7 +9,7 @@ export default function TracksPage() {
 
   return (
     <main className="container mx-auto px-4 py-8 pb-[160px]">
-      <h1 className="text-3xl font-bold mb-8">Треки</h1>
+      <h1 className="text-3xl font-bold mb-8">Tracks</h1>
 
       <TracksList onCreateTrackClick={() => setIsCreateModalOpen(true)} />
 

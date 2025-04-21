@@ -20,19 +20,15 @@ export const trackApi = {
   },
   deleteTrack: async (id: string) => {
     try {
-      // Спочатку отримуємо інформацію про трек
       const trackResponse = await api.get(`/tracks/${id}`);
       const track = trackResponse.data;
 
-      // Якщо є аудіофайл, видаляємо його
       if (track.audioFile) {
         await api.delete(`/tracks/${id}/file`);
       }
 
-      // Потім видаляємо сам трек
       return api.delete(`/tracks/${id}`);
     } catch (error) {
-      // Якщо виникла помилка при видаленні файлу, все одно намагаємося видалити трек
       console.error("Error deleting track file:", error);
       return api.delete(`/tracks/${id}`);
     }

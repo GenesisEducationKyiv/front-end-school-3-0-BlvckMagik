@@ -30,7 +30,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
   const { data: tracksData, isLoading } = useQuery({
     queryKey: ["tracks", queryParams],
     queryFn: () => trackApi.getTracks(queryParams),
-    staleTime: 1000 * 60, // Кешуємо дані на 1 хвилину
+    staleTime: 1000 * 60,
   });
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
           className="flex items-center gap-2 px-4 py-2 justify-center bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors w-full md:w-auto"
         >
           <PlusIcon className="h-5 w-5" />
-          <span>Створити трек</span>
+          <span>Create Track</span>
         </button>
       </div>{" "}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -132,7 +132,6 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
           />
         </div>
       </div>
-      {/* Список треків */}
       {isLoading ? (
         <div>Loading...</div>
       ) : (
@@ -142,7 +141,6 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
           ))}
         </div>
       )}
-      {/* Пагінація */}
       {tracksData?.data.meta && (
         <div className="flex justify-center gap-2 mt-4">
           {Array.from({ length: tracksData.data.meta.totalPages }, (_, i) => (

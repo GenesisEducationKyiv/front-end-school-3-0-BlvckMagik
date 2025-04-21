@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
 
-// Клас для управління аудіо контекстом
 class AudioContextManager {
   private static instance: AudioContextManager | null = null;
   private audioContext: AudioContext | null = null;
@@ -24,22 +23,17 @@ class AudioContextManager {
     context: AudioContext;
     analyser: AnalyserNode;
   } {
-    // Якщо елемент вже підключений, відключаємо його
     this.cleanup();
 
-    // Створюємо новий контекст
     this.audioContext = new AudioContext();
 
-    // Створюємо нові ноди
     this.sourceNode = this.audioContext.createMediaElementSource(audioElement);
     this.analyserNode = this.audioContext.createAnalyser();
     this.analyserNode.fftSize = 256;
 
-    // Підключаємо ноди
     this.sourceNode.connect(this.analyserNode);
     this.analyserNode.connect(this.audioContext.destination);
 
-    // Зберігаємо посилання на підключений елемент
     this.connectedElement = audioElement;
 
     return {
@@ -122,35 +116,28 @@ export default function AudioPlayer({
     AudioContextManager.getInstance()
   );
 
-  // Ініціалізуємо аудіо контекст та ноди при зміні URL
   useEffect(() => {
     if (!audioRef.current) return;
 
-    // Ініціалізація аудіо контексту
     const initializeAudioContext = async () => {
       try {
         const manager = contextManagerRef.current;
 
-        // Перевіряємо, чи вже підключений цей елемент
         if (audioRef.current && manager.isElementConnected(audioRef.current)) {
-          // Якщо так, просто запускаємо візуалізацію
           if (canvasRef.current && manager.getAnalyser()) {
             startVisualization();
           }
           return;
         }
 
-        // Ініціалізуємо новий контекст
         if (audioRef.current) {
           const { context } = manager.initialize(audioRef.current);
 
-          // Відновлюємо контекст, якщо він призупинений
           if (context.state === "suspended") {
             await context.resume();
           }
         }
 
-        // Запускаємо візуалізацію
         if (canvasRef.current) {
           startVisualization();
         }
@@ -159,7 +146,6 @@ export default function AudioPlayer({
       }
     };
 
-    // Функція для запуску візуалізації
     const startVisualization = () => {
       const manager = contextManagerRef.current;
       const analyser = manager.getAnalyser();
@@ -177,7 +163,6 @@ export default function AudioPlayer({
         animationFrameRef.current = requestAnimationFrame(draw);
         analyser.getByteFrequencyData(dataArray);
 
-        // Очищаємо канвас з прозорим фоном
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const barWidth = (canvas.width / bufferLength) * 2.5;
@@ -200,19 +185,16 @@ export default function AudioPlayer({
       draw();
     };
 
-    // Ініціалізуємо при завантаженні аудіо
     const handleCanPlay = () => {
       initializeAudioContext();
     };
 
     audioRef.current.addEventListener("canplay", handleCanPlay);
 
-    // Якщо аудіо вже готове, ініціалізуємо відразу
     if (audioRef.current.readyState >= 3) {
       initializeAudioContext();
     }
 
-    // Очищення при розмонтуванні компонента або зміні URL
     return () => {
       if (audioRef.current) {
         audioRef.current.removeEventListener("canplay", handleCanPlay);
@@ -224,7 +206,6 @@ export default function AudioPlayer({
     };
   }, [audioUrl, isPlaying]);
 
-  // Оновлюємо візуалізацію при зміні стану відтворення
   useEffect(() => {
     const manager = contextManagerRef.current;
     const analyser = manager.getAnalyser();
@@ -241,7 +222,6 @@ export default function AudioPlayer({
         animationFrameRef.current = requestAnimationFrame(draw);
         analyser.getByteFrequencyData(dataArray);
 
-        // Очищаємо канвас з прозорим фоном
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const barWidth = (canvas.width / bufferLength) * 2.5;
@@ -271,7 +251,6 @@ export default function AudioPlayer({
     };
   }, [isPlaying]);
 
-  // Очищаємо ресурси при закритті плеєра
   useEffect(() => {
     return () => {
       contextManagerRef.current.cleanup();
@@ -282,7 +261,6 @@ export default function AudioPlayer({
     };
   }, []);
 
-  // Оновлюємо час відтворення
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -299,7 +277,6 @@ export default function AudioPlayer({
     };
   }, []);
 
-  // Керуємо відтворенням
   useEffect(() => {
     if (!audioRef.current) return;
 
@@ -341,7 +318,6 @@ export default function AudioPlayer({
 
   return (
     <div className="fixed bottom-0 left-0 right-0">
-      {/* Канвас без блюру */}
       <div className="w-full bg-secondary">
         <canvas
           ref={canvasRef}
@@ -351,9 +327,7 @@ export default function AudioPlayer({
         />
       </div>
 
-      {/* Контейнер з блюром для решти плеєра */}
       <div className="w-full bg-secondary backdrop-blur-lg">
-        {/* Мобільний прогрес-бар */}
         <div
           ref={mobileProgressRef}
           className="md:hidden w-full h-1 bg-gray-600 cursor-pointer"
@@ -397,7 +371,6 @@ export default function AudioPlayer({
                 </button>
               </div>
 
-              {/* Десктопний прогрес-бар */}
               <div className="hidden md:flex items-center gap-2">
                 <span className="text-sm text-gray-400 w-12 text-right">
                   {formatTime(currentTime)}

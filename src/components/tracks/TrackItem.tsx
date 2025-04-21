@@ -89,7 +89,6 @@ export default function TrackItem({ track }: TrackItemProps) {
       await trackApi.deleteTrack(track.id);
       deleteTrack(track.id);
 
-      // Інвалідуємо кеш для оновлення списку треків
       queryClient.invalidateQueries({ queryKey: ["tracks"] });
     } catch (error) {
       console.error("Failed to delete track:", error);

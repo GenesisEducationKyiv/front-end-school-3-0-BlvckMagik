@@ -218,14 +218,14 @@ export default function EditTrackModal({
               className="px-4 py-2 border rounded"
               disabled={isSubmitting}
             >
-              Скасувати
+              Cancel
             </button>
             <button
               type="submit"
               className="px-4 py-2 bg-blue-500 text-white rounded"
               disabled={isSubmitting || !!fileError}
             >
-              {isSubmitting ? "Збереження..." : "Зберегти"}
+              {isSubmitting ? "Saving..." : "Save"}
             </button>
           </div>
         </form>

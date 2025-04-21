@@ -75,7 +75,7 @@ export default function CreateTrackModal({
       !validTypes.includes(file.type) &&
       !["mp3", "wav"].includes(fileExtension || "")
     ) {
-      setFileError("Будь ласка, завантажте аудіофайл у форматі MP3 або WAV");
+      setFileError("Please upload an audio file in MP3 or WAV format");
       return false;
     }
 
@@ -111,7 +111,6 @@ export default function CreateTrackModal({
       onClose();
     } catch (error) {
       console.error("Failed to create track:", error);
-      // Відновлюємо стан при помилці
       window.location.reload();
     } finally {
       setIsSubmitting(false);
@@ -149,7 +148,7 @@ export default function CreateTrackModal({
           </div>
 
           <div>
-            <label className="block mb-1">Альбом</label>
+            <label className="block mb-1">Album</label>
             <input
               {...register("album")}
               className="w-full border rounded p-2"
@@ -157,7 +156,7 @@ export default function CreateTrackModal({
           </div>
 
           <div>
-            <label className="block mb-1">Обкладинка (URL)</label>
+            <label className="block mb-1">Cover Image (URL)</label>
             <input
               {...register("coverImage")}
               className="w-full border rounded p-2"
@@ -170,7 +169,7 @@ export default function CreateTrackModal({
           </div>
 
           <div>
-            <label className="block mb-1">Жанри</label>
+            <label className="block mb-1">Genres</label>
             <Select
               isMulti
               options={genreOptions}
@@ -193,7 +192,7 @@ export default function CreateTrackModal({
           </div>
 
           <div>
-            <label className="block mb-1">Аудіо файл</label>
+            <label className="block mb-1">Audio File</label>
             <input
               type="file"
               accept="audio/mpeg,audio/wav,.mp3,.wav"
@@ -209,14 +208,14 @@ export default function CreateTrackModal({
               onClick={onClose}
               className="px-4 py-2 border rounded"
             >
-              Скасувати
+              Cancel
             </button>
             <button
               type="submit"
               className="px-4 py-2 bg-blue-500 text-white rounded"
               disabled={isSubmitting || !!fileError}
             >
-              {isSubmitting ? "Створення..." : "Створити"}
+              {isSubmitting ? "Creating..." : "Create"}
             </button>
           </div>
         </form>
