@@ -10,6 +10,7 @@ import { useTracks } from "@/contexts/TracksContext";
 import { trackApi } from "@/lib/api";
 import Select from "react-select";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface EditTrackModalProps {
   isOpen: boolean;
@@ -23,12 +24,14 @@ export default function EditTrackModal({
   track,
 }: EditTrackModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [genreOptions, setGenreOptions] = useState<
     { value: string; label: string }[]
   >([]);
   const { updateTrack } = useTracks();
   const { currentTrack, stopPlayback } = useAudioPlayer();
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -64,27 +67,50 @@ export default function EditTrackModal({
     fetchGenres();
   }, []);
 
+  const validateAudioFile = (file: File | null): boolean => {
+    if (!file) return true;
+
+    const validTypes = ["audio/mpeg", "audio/wav", "audio/mp3"];
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+
+    if (
+      !validTypes.includes(file.type) &&
+      !["mp3", "wav"].includes(fileExtension || "")
+    ) {
+      setFileError("Будь ласка, завантажте аудіофайл у форматі MP3 або WAV");
+      return false;
+    }
+
+    setFileError(null);
+    return true;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+    validateAudioFile(file);
+  };
+
   const onSubmit = async (data: TrackFormData) => {
+    if (!validateAudioFile(selectedFile)) return;
+
     try {
       setIsSubmitting(true);
 
-      const formData = {
-        ...data,
-        coverImage: data.coverImage || "",
-      };
+      if (currentTrack?.track.id === track.id) {
+        stopPlayback();
+      }
 
-      const response = await trackApi.updateTrack(track.id, formData);
-      const updatedTrack = response.data;
+      const response = await trackApi.updateTrack(track.id, data);
+      let updatedTrack = response.data;
 
       if (selectedFile) {
-        if (currentTrack?.track.id === track.id) {
-          stopPlayback();
-        }
-        const trackWithAudio = await uploadTrackFile(track.id, selectedFile);
-        updateTrack(trackWithAudio);
-      } else {
-        updateTrack(updatedTrack);
+        updatedTrack = await uploadTrackFile(track.id, selectedFile);
       }
+
+      updateTrack(updatedTrack);
+
+      queryClient.invalidateQueries({ queryKey: ["tracks"] });
 
       onClose();
     } catch (error) {
@@ -178,10 +204,11 @@ export default function EditTrackModal({
             <label className="block mb-1">Audio File</label>
             <input
               type="file"
-              accept="audio/*"
-              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+              accept="audio/mpeg,audio/wav,.mp3,.wav"
+              onChange={handleFileChange}
               className="w-full border rounded p-2"
             />
+            {fileError && <p className="text-red-500 text-sm">{fileError}</p>}
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
@@ -196,7 +223,7 @@ export default function EditTrackModal({
             <button
               type="submit"
               className="px-4 py-2 bg-blue-500 text-white rounded"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !!fileError}
             >
               {isSubmitting ? "Збереження..." : "Зберегти"}
             </button>

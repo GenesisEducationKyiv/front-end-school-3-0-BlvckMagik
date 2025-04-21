@@ -9,6 +9,7 @@ import { uploadTrackFile } from "@/app/actions/tracks";
 import { useTracks } from "@/contexts/TracksContext";
 import { trackApi } from "@/lib/api";
 import Select from "react-select";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CreateTrackModalProps {
   isOpen: boolean;
@@ -20,11 +21,13 @@ export default function CreateTrackModal({
   onClose,
 }: CreateTrackModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [genreOptions, setGenreOptions] = useState<
     { value: string; label: string }[]
   >([]);
   const { addTrack } = useTracks();
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -62,7 +65,33 @@ export default function CreateTrackModal({
     fetchGenres();
   }, []);
 
+  const validateAudioFile = (file: File | null): boolean => {
+    if (!file) return true;
+
+    const validTypes = ["audio/mpeg", "audio/wav", "audio/mp3"];
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+
+    if (
+      !validTypes.includes(file.type) &&
+      !["mp3", "wav"].includes(fileExtension || "")
+    ) {
+      setFileError("Будь ласка, завантажте аудіофайл у форматі MP3 або WAV");
+      return false;
+    }
+
+    setFileError(null);
+    return true;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+    validateAudioFile(file);
+  };
+
   const onSubmit = async (data: TrackFormData) => {
+    if (!validateAudioFile(selectedFile)) return;
+
     try {
       setIsSubmitting(true);
 
@@ -75,6 +104,8 @@ export default function CreateTrackModal({
       } else {
         addTrack(newTrack);
       }
+
+      queryClient.invalidateQueries({ queryKey: ["tracks"] });
 
       reset();
       onClose();
@@ -165,10 +196,11 @@ export default function CreateTrackModal({
             <label className="block mb-1">Аудіо файл</label>
             <input
               type="file"
-              accept="audio/*"
-              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+              accept="audio/mpeg,audio/wav,.mp3,.wav"
+              onChange={handleFileChange}
               className="w-full border rounded p-2"
             />
+            {fileError && <p className="text-red-500 text-sm">{fileError}</p>}
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
@@ -182,7 +214,7 @@ export default function CreateTrackModal({
             <button
               type="submit"
               className="px-4 py-2 bg-blue-500 text-white rounded"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !!fileError}
             >
               {isSubmitting ? "Створення..." : "Створити"}
             </button>

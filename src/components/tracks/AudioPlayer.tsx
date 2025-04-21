@@ -7,7 +7,7 @@ import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
 class AudioContextManager {
   private static instance: AudioContextManager | null = null;
   private audioContext: AudioContext | null = null;
-  private sourceNode: MediaElementSourceNode | null = null;
+  private sourceNode: MediaElementAudioSourceNode | null = null;
   private analyserNode: AnalyserNode | null = null;
   private connectedElement: HTMLAudioElement | null = null;
 
@@ -110,7 +110,6 @@ export default function AudioPlayer({
   track,
   isPlaying,
   setIsPlaying,
-  onClose,
 }: AudioPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -133,7 +132,7 @@ export default function AudioPlayer({
         const manager = contextManagerRef.current;
 
         // Перевіряємо, чи вже підключений цей елемент
-        if (manager.isElementConnected(audioRef.current)) {
+        if (audioRef.current && manager.isElementConnected(audioRef.current)) {
           // Якщо так, просто запускаємо візуалізацію
           if (canvasRef.current && manager.getAnalyser()) {
             startVisualization();
@@ -142,11 +141,13 @@ export default function AudioPlayer({
         }
 
         // Ініціалізуємо новий контекст
-        const { context } = manager.initialize(audioRef.current);
+        if (audioRef.current) {
+          const { context } = manager.initialize(audioRef.current);
 
-        // Відновлюємо контекст, якщо він призупинений
-        if (context.state === "suspended") {
-          await context.resume();
+          // Відновлюємо контекст, якщо він призупинений
+          if (context.state === "suspended") {
+            await context.resume();
+          }
         }
 
         // Запускаємо візуалізацію
