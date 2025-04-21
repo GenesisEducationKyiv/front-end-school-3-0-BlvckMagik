@@ -35,3 +35,13 @@ export interface PaginatedResponse<T> {
   data: T[];
   meta: PaginationMeta;
 }
+
+export interface TrackQueryParams {
+  page: number;
+  limit: number;
+  sort?: string;
+  order?: "asc" | "desc";
+  search?: string;
+  genre?: string;
+  artist?: string;
+}

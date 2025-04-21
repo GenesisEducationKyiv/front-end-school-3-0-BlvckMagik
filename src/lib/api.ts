@@ -1,5 +1,5 @@
 import axios from "axios";
-import { CreateTrackDto, TrackFormData } from "@/types";
+import { CreateTrackDto, TrackFormData, TrackQueryParams } from "@/types";
 
 export const api = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`,
@@ -9,7 +9,7 @@ export const api = axios.create({
 });
 
 export const trackApi = {
-  getTracks: async (params: { page: number; limit: number; id?: string }) => {
+  getTracks: async (params: TrackQueryParams) => {
     return api.get("/tracks", { params });
   },
   createTrack: async (data: CreateTrackDto) => {

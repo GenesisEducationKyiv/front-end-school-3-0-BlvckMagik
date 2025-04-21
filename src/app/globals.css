@@ -93,6 +93,40 @@ h6 {
   background-color: #3333334d !important;
 }
 
+#react-select-sort-select-option-0,
+#react-select-sort-select-option-1,
+#react-select-sort-select-option-2,
+#react-select-sort-select-option-3 {
+  color: hsl(0, 0%, 100%) !important;
+}
+
+#genre-select {
+  height: 100% !important;
+}
+
+#sort-select:nth-child(1) > div > div > div {
+  color: rgb(128, 128, 128);
+}
+
+#genre-select > div,
+#sort-select > div {
+  background-color: transparent !important;
+  color: #ededed !important;
+  height: 100% !important;
+}
+
+#react-select-sort-select-listbox,
+#react-select-genre-select-listbox {
+  background: #1a1a1a !important;
+}
+
+#react-select-sort-select-listbox > div:hover,
+#react-select-genre-select-listbox > div:hover {
+  background: #333333 !important;
+  cursor: pointer;
+  background-color: #333333 !important;
+}
+
 @layer base {
   :root {
     --background: 240 10% 3.9%;
