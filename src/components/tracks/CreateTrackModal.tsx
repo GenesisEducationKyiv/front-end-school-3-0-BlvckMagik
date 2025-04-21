@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TrackFormData } from "@/types";
@@ -8,6 +8,7 @@ import { trackFormSchema } from "@/lib/validators";
 import { uploadTrackFile } from "@/app/actions/tracks";
 import { useTracks } from "@/contexts/TracksContext";
 import { trackApi } from "@/lib/api";
+import Select from "react-select";
 
 interface CreateTrackModalProps {
   isOpen: boolean;
@@ -20,12 +21,16 @@ export default function CreateTrackModal({
 }: CreateTrackModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [genreOptions, setGenreOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const { addTrack } = useTracks();
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<TrackFormData>({
     resolver: zodResolver(trackFormSchema),
@@ -38,6 +43,25 @@ export default function CreateTrackModal({
     },
   });
 
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await trackApi.getGenres();
+        const genres = response.data;
+        setGenreOptions(
+          genres.map((genre: string) => ({
+            value: genre,
+            label: genre.charAt(0).toUpperCase() + genre.slice(1),
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch genres:", error);
+      }
+    };
+
+    fetchGenres();
+  }, []);
+
   const onSubmit = async (data: TrackFormData) => {
     try {
       setIsSubmitting(true);
@@ -45,12 +69,13 @@ export default function CreateTrackModal({
       const response = await trackApi.createTrack(data);
       const newTrack = response.data;
 
-      // Оптимістичне оновлення
-      addTrack(newTrack);
-
       if (selectedFile) {
-        await uploadTrackFile(newTrack.id, selectedFile);
+        const updatedTrack = await uploadTrackFile(newTrack.id, selectedFile);
+        addTrack(updatedTrack);
+      } else {
+        addTrack(newTrack);
       }
+
       reset();
       onClose();
     } catch (error) {
@@ -115,16 +140,22 @@ export default function CreateTrackModal({
 
           <div>
             <label className="block mb-1">Жанри</label>
-            <select
-              multiple
-              {...register("genres")}
-              className="w-full border rounded p-2"
-            >
-              <option value="rock">Рок</option>
-              <option value="pop">Поп</option>
-              <option value="jazz">Джаз</option>
-              <option value="classical">Класика</option>
-            </select>
+            <Select
+              isMulti
+              options={genreOptions}
+              className="basic-multi-select bg-transparent"
+              classNamePrefix="select"
+              onChange={(selectedOptions) => {
+                const values = selectedOptions.map((option) => option.value);
+                setValue("genres", values);
+              }}
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  backgroundColor: "white",
+                }),
+              }}
+            />
             {errors.genres && (
               <p className="text-red-500 text-sm">{errors.genres.message}</p>
             )}

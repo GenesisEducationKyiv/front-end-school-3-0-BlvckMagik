@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Track, TrackFormData } from "@/types";
@@ -8,6 +8,7 @@ import { trackFormSchema } from "@/lib/validators";
 import { uploadTrackFile } from "@/app/actions/tracks";
 import { useTracks } from "@/contexts/TracksContext";
 import { trackApi } from "@/lib/api";
+import Select from "react-select";
 
 interface EditTrackModalProps {
   isOpen: boolean;
@@ -22,11 +23,15 @@ export default function EditTrackModal({
 }: EditTrackModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [genreOptions, setGenreOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const { updateTrack } = useTracks();
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<TrackFormData>({
     resolver: zodResolver(trackFormSchema),
@@ -38,6 +43,25 @@ export default function EditTrackModal({
       coverImage: track.coverImage || "",
     },
   });
+
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await trackApi.getGenres();
+        const genres = response.data;
+        setGenreOptions(
+          genres.map((genre: string) => ({
+            value: genre,
+            label: genre.charAt(0).toUpperCase() + genre.slice(1),
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch genres:", error);
+      }
+    };
+
+    fetchGenres();
+  }, []);
 
   const onSubmit = async (data: TrackFormData) => {
     try {
@@ -51,11 +75,13 @@ export default function EditTrackModal({
       const response = await trackApi.updateTrack(track.id, formData);
       const updatedTrack = response.data;
 
-      updateTrack(updatedTrack);
-
       if (selectedFile) {
-        await uploadTrackFile(track.id, selectedFile);
+        const trackWithAudio = await uploadTrackFile(track.id, selectedFile);
+        updateTrack(trackWithAudio);
+      } else {
+        updateTrack(updatedTrack);
       }
+
       onClose();
     } catch (error) {
       console.error("Failed to update track:", error);
@@ -119,16 +145,26 @@ export default function EditTrackModal({
 
           <div>
             <label className="block mb-1">Жанри</label>
-            <select
-              multiple
-              {...register("genres")}
-              className="w-full border rounded p-2"
-            >
-              <option value="rock">Рок</option>
-              <option value="pop">Поп</option>
-              <option value="jazz">Джаз</option>
-              <option value="classical">Класика</option>
-            </select>
+            <Select
+              isMulti
+              options={genreOptions}
+              defaultValue={track.genres.map((genre) => ({
+                value: genre,
+                label: genre.charAt(0).toUpperCase() + genre.slice(1),
+              }))}
+              className="basic-multi-select"
+              classNamePrefix="select"
+              onChange={(selectedOptions) => {
+                const values = selectedOptions.map((option) => option.value);
+                setValue("genres", values);
+              }}
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  backgroundColor: "white",
+                }),
+              }}
+            />
             {errors.genres && (
               <p className="text-red-500 text-sm">{errors.genres.message}</p>
             )}

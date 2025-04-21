@@ -23,7 +23,7 @@ export default function TrackItem({ track }: TrackItemProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const { setCurrentTrack, currentTrack, isPlaying, setIsPlaying } =
     useAudioPlayer();
-  const { updateTrack, deleteTrack } = useTracks();
+  const { deleteTrack } = useTracks();
 
   const isCurrentTrack = currentTrack?.track.id === track.id;
 

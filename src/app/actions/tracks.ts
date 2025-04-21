@@ -29,7 +29,7 @@ export async function deleteTrack(id: string) {
   revalidatePath("/tracks");
 }
 
-export async function uploadTrackFile(id: string, file: File) {
-  await trackApi.uploadFile(id, file);
-  revalidatePath("/tracks");
+export async function uploadTrackFile(trackId: string, file: File) {
+  const response = await trackApi.uploadFile(trackId, file);
+  return response.data;
 }

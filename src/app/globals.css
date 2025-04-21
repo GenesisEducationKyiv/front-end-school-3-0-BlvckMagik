@@ -72,6 +72,27 @@ h6 {
   overflow-wrap: break-word;
 }
 
+.select__control {
+  background-color: transparent !important;
+}
+
+.select__menu {
+  background-color: #1a1a1a !important;
+}
+
+.select__option--is-focused {
+  background: #333333 !important;
+  cursor: pointer;
+}
+
+.select__multi-value__remove svg {
+  fill: #1a1a1a;
+}
+
+.select__multi-value__remove:hover {
+  background-color: #3333334d !important;
+}
+
 @layer base {
   :root {
     --background: 240 10% 3.9%;

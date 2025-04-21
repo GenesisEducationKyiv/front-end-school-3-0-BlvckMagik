@@ -9,7 +9,7 @@ export const api = axios.create({
 });
 
 export const trackApi = {
-  getTracks: async (params: { page: number; limit: number }) => {
+  getTracks: async (params: { page: number; limit: number; id?: string }) => {
     return api.get("/tracks", { params });
   },
   createTrack: async (data: CreateTrackDto) => {
@@ -37,5 +37,8 @@ export const trackApi = {
       responseType: "blob",
     });
     return URL.createObjectURL(response.data);
+  },
+  getGenres: async () => {
+    return api.get("/genres");
   },
 };
