@@ -8,7 +8,7 @@ export default function TracksPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <main className="container mx-auto px-4 py-8 pb-[160px]">
       <h1 className="text-3xl font-bold mb-8">Треки</h1>
 
       <TracksList onCreateTrackClick={() => setIsCreateModalOpen(true)} />
@@ -17,6 +17,6 @@ export default function TracksPage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       />
-    </div>
+    </main>
   );
 }

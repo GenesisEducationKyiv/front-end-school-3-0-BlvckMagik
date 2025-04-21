@@ -72,7 +72,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <button
           onClick={onCreateTrackClick}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors w-full md:w-auto"
+          className="flex items-center gap-2 px-4 py-2 justify-center bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors w-full md:w-auto"
         >
           <PlusIcon className="h-5 w-5" />
           <span>Створити трек</span>

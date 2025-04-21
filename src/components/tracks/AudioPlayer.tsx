@@ -177,8 +177,8 @@ export default function AudioPlayer({
         animationFrameRef.current = requestAnimationFrame(draw);
         analyser.getByteFrequencyData(dataArray);
 
-        ctx.fillStyle = "rgb(10, 10, 10)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Очищаємо канвас з прозорим фоном
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const barWidth = (canvas.width / bufferLength) * 2.5;
         let barHeight;
@@ -241,8 +241,8 @@ export default function AudioPlayer({
         animationFrameRef.current = requestAnimationFrame(draw);
         analyser.getByteFrequencyData(dataArray);
 
-        ctx.fillStyle = "rgb(10, 10, 10)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Очищаємо канвас з прозорим фоном
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const barWidth = (canvas.width / bufferLength) * 2.5;
         let barHeight;
@@ -340,77 +340,84 @@ export default function AudioPlayer({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-secondary backdrop-blur-lg">
-      <canvas
-        ref={canvasRef}
-        className="w-full h-16"
-        width={window.innerWidth}
-        height={64}
-      />
-      {/* Мобільний прогрес-бар */}
-      <div
-        ref={mobileProgressRef}
-        className="md:hidden w-full h-1 bg-gray-600 cursor-pointer"
-        onClick={handleMobileProgressClick}
-      >
-        <div
-          className="h-full bg-white"
-          style={{ width: `${(currentTime / duration) * 100}%` }}
+    <div className="fixed bottom-0 left-0 right-0">
+      {/* Канвас без блюру */}
+      <div className="w-full bg-secondary">
+        <canvas
+          ref={canvasRef}
+          className="w-full h-16"
+          width={window.innerWidth}
+          height={64}
         />
       </div>
 
-      <div className="hidden md:block border-t border-border/40" />
+      {/* Контейнер з блюром для решти плеєра */}
+      <div className="w-full bg-secondary backdrop-blur-lg">
+        {/* Мобільний прогрес-бар */}
+        <div
+          ref={mobileProgressRef}
+          className="md:hidden w-full h-1 bg-gray-600 cursor-pointer"
+          onClick={handleMobileProgressClick}
+        >
+          <div
+            className="h-full bg-white"
+            style={{ width: `${(currentTime / duration) * 100}%` }}
+          />
+        </div>
 
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-            <img
-              src={track.coverImage || "/default-cover.webp"}
-              alt={track.title}
-              className="w-12 h-12 rounded object-cover"
-            />
-            <div className="flex-1 min-w-0">
-              <div className="font-medium truncate">{track.title}</div>
-              <div className="text-sm text-gray-400 truncate">
-                {track.artist}
+        <div className="hidden md:block border-t border-border/40" />
+
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <img
+                src={track.coverImage || "/default-cover.webp"}
+                alt={track.title}
+                className="w-12 h-12 rounded object-cover"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium truncate">{track.title}</div>
+                <div className="text-sm text-gray-400 truncate">
+                  {track.artist}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex-1 flex flex-col gap-1">
-            <div className="flex items-center gap-4 justify-end md:justify-center">
-              <button
-                onClick={togglePlay}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/20 hover:bg-primary/30 transition-colors"
-              >
-                {isPlaying ? (
-                  <PauseIcon className="w-5 h-5 text-white" />
-                ) : (
-                  <PlayIcon className="w-5 h-5 text-white" />
-                )}
-              </button>
-            </div>
+            <div className="flex-1 flex flex-col gap-1">
+              <div className="flex items-center gap-4 justify-end md:justify-center">
+                <button
+                  onClick={togglePlay}
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/20 hover:bg-primary/30 transition-colors"
+                >
+                  {isPlaying ? (
+                    <PauseIcon className="w-5 h-5 text-white" />
+                  ) : (
+                    <PlayIcon className="w-5 h-5 text-white" />
+                  )}
+                </button>
+              </div>
 
-            {/* Десктопний прогрес-бар */}
-            <div className="hidden md:flex items-center gap-2">
-              <span className="text-sm text-gray-400 w-12 text-right">
-                {formatTime(currentTime)}
-              </span>
+              {/* Десктопний прогрес-бар */}
+              <div className="hidden md:flex items-center gap-2">
+                <span className="text-sm text-gray-400 w-12 text-right">
+                  {formatTime(currentTime)}
+                </span>
 
-              <div
-                ref={progressRef}
-                className="flex-1 h-1 bg-gray-600 rounded-full cursor-pointer"
-                onClick={handleProgressClick}
-              >
                 <div
-                  className="h-full bg-white rounded-full"
-                  style={{ width: `${(currentTime / duration) * 100}%` }}
-                />
-              </div>
+                  ref={progressRef}
+                  className="flex-1 h-1 bg-gray-600 rounded-full cursor-pointer"
+                  onClick={handleProgressClick}
+                >
+                  <div
+                    className="h-full bg-white rounded-full"
+                    style={{ width: `${(currentTime / duration) * 100}%` }}
+                  />
+                </div>
 
-              <span className="text-sm text-gray-400 w-12">
-                {formatTime(duration)}
-              </span>
+                <span className="text-sm text-gray-400 w-12">
+                  {formatTime(duration)}
+                </span>
+              </div>
             </div>
           </div>
         </div>

@@ -188,3 +188,8 @@ body {
   @apply bg-background text-foreground;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Додаємо відступ знизу для основного контенту */
+main {
+  padding-bottom: 160px; /* Достатньо місця для програвача */
+}
