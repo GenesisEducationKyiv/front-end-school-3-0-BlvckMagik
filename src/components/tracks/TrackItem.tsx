@@ -24,6 +24,7 @@ export default function TrackItem({ track }: TrackItemProps) {
   const { setCurrentTrack, currentTrack, isPlaying, setIsPlaying } =
     useAudioPlayer();
   const { deleteTrack } = useTracks();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const isCurrentTrack = currentTrack?.track.id === track.id;
 
@@ -69,17 +70,20 @@ export default function TrackItem({ track }: TrackItemProps) {
   };
 
   const handleDelete = async () => {
-    if (confirm("Ви впевнені, що хочете видалити цей трек?")) {
-      deleteTrack(track.id);
-
-      try {
-        await trackApi.deleteTrack(track.id);
-      } catch (error) {
-        console.error("Failed to delete track:", error);
-        window.location.reload();
-      }
+    if (!window.confirm("Ви впевнені, що хочете видалити цей трек?")) {
+      return;
     }
-    setIsMenuOpen(false);
+
+    try {
+      setIsDeleting(true);
+      await trackApi.deleteTrack(track.id);
+      deleteTrack(track.id);
+    } catch (error) {
+      console.error("Failed to delete track:", error);
+      window.location.reload();
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -178,8 +182,9 @@ export default function TrackItem({ track }: TrackItemProps) {
               <button
                 onClick={handleDelete}
                 className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition-colors"
+                disabled={isDeleting}
               >
-                Видалити
+                {isDeleting ? <span>Видалення...</span> : "Видалити"}
               </button>
             </div>
           )}

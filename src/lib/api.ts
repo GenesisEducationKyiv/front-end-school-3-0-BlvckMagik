@@ -19,6 +19,7 @@ export const trackApi = {
     return api.put(`/tracks/${id}`, data);
   },
   deleteTrack: async (id: string) => {
+    await api.delete(`/tracks/${id}/file`);
     return api.delete(`/tracks/${id}`);
   },
   uploadFile: async (id: string, file: File) => {
