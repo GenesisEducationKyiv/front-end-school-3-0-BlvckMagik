@@ -7,22 +7,27 @@ import { Track, TrackQueryParams } from "@/types";
 import { trackApi } from "@/lib/api";
 import TrackItem from "@/components/tracks/TrackItem";
 import Select from "react-select";
+import { PlusIcon } from "@heroicons/react/24/solid";
 
-export default function TrackList() {
+interface TracksListProps {
+  onCreateTrackClick: () => void;
+}
+
+export default function TracksList({ onCreateTrackClick }: TracksListProps) {
   const [genreOptions, setGenreOptions] = useState<
     { value: string; label: string }[]
   >([]);
   const [queryParams, setQueryParams] = useState<TrackQueryParams>({
     page: 1,
     limit: 10,
-    sort: "title",
-    order: "asc",
+    sort: "createdAt",
+    order: "desc",
     search: "",
     genre: "",
     artist: "",
   });
 
-  const { data: tracks, isLoading } = useQuery({
+  const { data: tracksData, isLoading } = useQuery({
     queryKey: ["tracks", queryParams],
     queryFn: () => trackApi.getTracks(queryParams),
     staleTime: 1000 * 60, // Кешуємо дані на 1 хвилину
@@ -56,15 +61,23 @@ export default function TrackList() {
   );
 
   const sortOptions = [
+    { value: "createdAt", label: "By Creation Date" },
     { value: "title", label: "By Title" },
     { value: "artist", label: "By Artist" },
     { value: "album", label: "By Album" },
-    { value: "createdAt", label: "By Creation Date" },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Фільтри та сортування */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <button
+          onClick={onCreateTrackClick}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors w-full md:w-auto"
+        >
+          <PlusIcon className="h-5 w-5" />
+          <span>Створити трек</span>
+        </button>
+      </div>{" "}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <input
@@ -119,22 +132,20 @@ export default function TrackList() {
           />
         </div>
       </div>
-
       {/* Список треків */}
       {isLoading ? (
         <div>Loading...</div>
       ) : (
         <div className="flex flex-col gap-8">
-          {tracks?.data.data.map((track: Track) => (
+          {tracksData?.data.data.map((track: Track) => (
             <TrackItem key={track.id} track={track} />
           ))}
         </div>
       )}
-
       {/* Пагінація */}
-      {tracks?.data.meta && (
+      {tracksData?.data.meta && (
         <div className="flex justify-center gap-2 mt-4">
-          {Array.from({ length: tracks.data.meta.totalPages }, (_, i) => (
+          {Array.from({ length: tracksData.data.meta.totalPages }, (_, i) => (
             <button
               key={i + 1}
               onClick={() =>

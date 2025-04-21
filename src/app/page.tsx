@@ -1,13 +1,22 @@
-import TrackList from "@/components/tracks/TrackList";
-import Header from "@/components/layout/Header";
+"use client";
 
-export default async function TracksPage() {
+import { useState } from "react";
+import CreateTrackModal from "@/components/tracks/CreateTrackModal";
+import TracksList from "@/components/tracks/TrackList";
+
+export default function TracksPage() {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   return (
-    <div className="min-h-screen">
-      <Header />
-      <main className="container mx-auto px-4 py-8">
-        <TrackList />
-      </main>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Треки</h1>
+
+      <TracksList onCreateTrackClick={() => setIsCreateModalOpen(true)} />
+
+      <CreateTrackModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   );
 }

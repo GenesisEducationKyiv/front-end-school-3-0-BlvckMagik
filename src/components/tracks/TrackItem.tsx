@@ -10,6 +10,7 @@ import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import TrackDetailsModal from "@/components/tracks/TrackDetailsModal";
 import { useTracks } from "@/contexts/TracksContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TrackItemProps {
   track: Track;
@@ -30,6 +31,7 @@ export default function TrackItem({ track }: TrackItemProps) {
   } = useAudioPlayer();
   const { deleteTrack } = useTracks();
   const [isDeleting, setIsDeleting] = useState(false);
+  const queryClient = useQueryClient();
 
   const isCurrentTrack = currentTrack?.track.id === track.id;
 
@@ -86,6 +88,9 @@ export default function TrackItem({ track }: TrackItemProps) {
       }
       await trackApi.deleteTrack(track.id);
       deleteTrack(track.id);
+
+      // Інвалідуємо кеш для оновлення списку треків
+      queryClient.invalidateQueries({ queryKey: ["tracks"] });
     } catch (error) {
       console.error("Failed to delete track:", error);
       window.location.reload();
