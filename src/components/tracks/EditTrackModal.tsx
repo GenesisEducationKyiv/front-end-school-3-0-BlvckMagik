@@ -100,11 +100,11 @@ export default function EditTrackModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-zinc-900 rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">Редагувати трек</h2>
+        <h2 className="text-xl font-bold mb-4">Edit Track</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block mb-1">Назва</label>
+            <label className="block mb-1">Title</label>
             <input
               {...register("title")}
               className="w-full border rounded p-2"
@@ -115,7 +115,7 @@ export default function EditTrackModal({
           </div>
 
           <div>
-            <label className="block mb-1">Виконавець</label>
+            <label className="block mb-1">Artist</label>
             <input
               {...register("artist")}
               className="w-full border rounded p-2"
@@ -126,7 +126,7 @@ export default function EditTrackModal({
           </div>
 
           <div>
-            <label className="block mb-1">Альбом</label>
+            <label className="block mb-1">Album</label>
             <input
               {...register("album")}
               className="w-full border rounded p-2"
@@ -134,7 +134,7 @@ export default function EditTrackModal({
           </div>
 
           <div>
-            <label className="block mb-1">Обкладинка (URL)</label>
+            <label className="block mb-1">Cover Image (URL)</label>
             <input
               {...register("coverImage")}
               placeholder="Введіть URL обкладинки"
@@ -148,7 +148,7 @@ export default function EditTrackModal({
           </div>
 
           <div>
-            <label className="block mb-1">Жанри</label>
+            <label className="block mb-1">Genres</label>
             <Select
               isMulti
               options={genreOptions}
@@ -175,7 +175,7 @@ export default function EditTrackModal({
           </div>
 
           <div>
-            <label className="block mb-1">Аудіо файл</label>
+            <label className="block mb-1">Audio File</label>
             <input
               type="file"
               accept="audio/*"

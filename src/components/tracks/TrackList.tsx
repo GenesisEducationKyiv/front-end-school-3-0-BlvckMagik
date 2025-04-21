@@ -56,10 +56,10 @@ export default function TrackList() {
   );
 
   const sortOptions = [
-    { value: "title", label: "За назвою" },
-    { value: "artist", label: "За виконавцем" },
-    { value: "album", label: "За альбомом" },
-    { value: "createdAt", label: "За датою створення" },
+    { value: "title", label: "By Title" },
+    { value: "artist", label: "By Artist" },
+    { value: "album", label: "By Album" },
+    { value: "createdAt", label: "By Creation Date" },
   ];
 
   return (
@@ -69,7 +69,7 @@ export default function TrackList() {
         <div>
           <input
             type="text"
-            placeholder="Пошук за назвою, виконавцем чи альбомом..."
+            placeholder="Search by title, artist or album..."
             className="w-full p-2 border rounded"
             onChange={(e) => debouncedSearch(e.target.value)}
           />
@@ -108,7 +108,7 @@ export default function TrackList() {
             instanceId="genre-select"
             options={genreOptions}
             isClearable
-            placeholder="Фільтр за жанром"
+            placeholder="Filter by genre"
             onChange={(option) =>
               setQueryParams((prev) => ({
                 ...prev,
@@ -122,7 +122,7 @@ export default function TrackList() {
 
       {/* Список треків */}
       {isLoading ? (
-        <div>Завантаження...</div>
+        <div>Loading...</div>
       ) : (
         <div className="flex flex-col gap-8">
           {tracks?.data.data.map((track: Track) => (
