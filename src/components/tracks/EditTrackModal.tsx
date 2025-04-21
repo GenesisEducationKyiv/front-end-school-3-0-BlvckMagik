@@ -9,6 +9,7 @@ import { uploadTrackFile } from "@/app/actions/tracks";
 import { useTracks } from "@/contexts/TracksContext";
 import { trackApi } from "@/lib/api";
 import Select from "react-select";
+import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 
 interface EditTrackModalProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ export default function EditTrackModal({
     { value: string; label: string }[]
   >([]);
   const { updateTrack } = useTracks();
-
+  const { currentTrack, stopPlayback } = useAudioPlayer();
   const {
     register,
     handleSubmit,
@@ -76,6 +77,9 @@ export default function EditTrackModal({
       const updatedTrack = response.data;
 
       if (selectedFile) {
+        if (currentTrack?.track.id === track.id) {
+          stopPlayback();
+        }
         const trackWithAudio = await uploadTrackFile(track.id, selectedFile);
         updateTrack(trackWithAudio);
       } else {

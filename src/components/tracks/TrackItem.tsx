@@ -21,8 +21,13 @@ export default function TrackItem({ track }: TrackItemProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { setCurrentTrack, currentTrack, isPlaying, setIsPlaying } =
-    useAudioPlayer();
+  const {
+    setCurrentTrack,
+    currentTrack,
+    isPlaying,
+    setIsPlaying,
+    stopPlayback,
+  } = useAudioPlayer();
   const { deleteTrack } = useTracks();
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -76,6 +81,9 @@ export default function TrackItem({ track }: TrackItemProps) {
 
     try {
       setIsDeleting(true);
+      if (currentTrack?.track.id === track.id) {
+        stopPlayback();
+      }
       await trackApi.deleteTrack(track.id);
       deleteTrack(track.id);
     } catch (error) {

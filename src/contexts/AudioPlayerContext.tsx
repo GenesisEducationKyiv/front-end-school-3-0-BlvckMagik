@@ -16,6 +16,7 @@ interface AudioPlayerContextType {
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
   setCurrentTrack: (track: AudioPlayerContextType["currentTrack"]) => void;
+  stopPlayback: () => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(
@@ -31,9 +32,20 @@ export function AudioPlayerProvider({
     useState<AudioPlayerContextType["currentTrack"]>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const stopPlayback = () => {
+    setCurrentTrack(null);
+    setIsPlaying(false);
+  };
+
   return (
     <AudioPlayerContext.Provider
-      value={{ currentTrack, setCurrentTrack, isPlaying, setIsPlaying }}
+      value={{
+        currentTrack,
+        setCurrentTrack,
+        isPlaying,
+        setIsPlaying,
+        stopPlayback,
+      }}
     >
       {children}
       {currentTrack && (
