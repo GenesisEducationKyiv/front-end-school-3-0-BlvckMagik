@@ -77,7 +77,7 @@ export default function EditTrackModal({
       !validTypes.includes(file.type) &&
       !["mp3", "wav"].includes(fileExtension || "")
     ) {
-      setFileError("Будь ласка, завантажте аудіофайл у форматі MP3 або WAV");
+      setFileError("Please upload an audio file in MP3 or WAV format");
       return false;
     }
 
@@ -128,32 +128,43 @@ export default function EditTrackModal({
       <div className="bg-zinc-900 rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Edit Track</h2>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          data-testid="track-form"
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4"
+        >
           <div>
             <label className="block mb-1">Title</label>
             <input
+              data-testid="input-title"
               {...register("title")}
               className="w-full border rounded p-2"
             />
             {errors.title && (
-              <p className="text-red-500 text-sm">{errors.title.message}</p>
+              <p data-testid="error-title" className="text-red-500 text-sm">
+                {errors.title.message}
+              </p>
             )}
           </div>
 
           <div>
             <label className="block mb-1">Artist</label>
             <input
+              data-testid="input-artist"
               {...register("artist")}
               className="w-full border rounded p-2"
             />
             {errors.artist && (
-              <p className="text-red-500 text-sm">{errors.artist.message}</p>
+              <p data-testid="error-artist" className="text-red-500 text-sm">
+                {errors.artist.message}
+              </p>
             )}
           </div>
 
           <div>
             <label className="block mb-1">Album</label>
             <input
+              data-testid="input-album"
               {...register("album")}
               className="w-full border rounded p-2"
             />
@@ -162,12 +173,16 @@ export default function EditTrackModal({
           <div>
             <label className="block mb-1">Cover Image (URL)</label>
             <input
+              data-testid="input-cover-image"
               {...register("coverImage")}
-              placeholder="Введіть URL обкладинки"
+              placeholder="Enter the URL of the cover image"
               className="w-full border rounded p-2"
             />
             {errors.coverImage && (
-              <p className="text-red-500 text-sm">
+              <p
+                data-testid="error-cover-image"
+                className="text-red-500 text-sm"
+              >
                 {errors.coverImage.message}
               </p>
             )}
@@ -176,6 +191,7 @@ export default function EditTrackModal({
           <div>
             <label className="block mb-1">Genres</label>
             <Select
+              data-testid="genre-selector"
               isMulti
               options={genreOptions}
               defaultValue={track.genres.map((genre) => ({
@@ -196,7 +212,9 @@ export default function EditTrackModal({
               }}
             />
             {errors.genres && (
-              <p className="text-red-500 text-sm">{errors.genres.message}</p>
+              <p data-testid="error-genre" className="text-red-500 text-sm">
+                {errors.genres.message}
+              </p>
             )}
           </div>
 
@@ -208,7 +226,14 @@ export default function EditTrackModal({
               onChange={handleFileChange}
               className="w-full border rounded p-2"
             />
-            {fileError && <p className="text-red-500 text-sm">{fileError}</p>}
+            {fileError && (
+              <p
+                data-testid="error-audio-file"
+                className="text-red-500 text-sm"
+              >
+                {fileError}
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
@@ -216,16 +241,21 @@ export default function EditTrackModal({
               type="button"
               onClick={onClose}
               className="px-4 py-2 border rounded"
-              disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
+              data-testid="submit-button"
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded"
               disabled={isSubmitting || !!fileError}
+              aria-disabled={isSubmitting || !!fileError}
+              className="px-4 py-2 bg-blue-500 text-white rounded"
             >
-              {isSubmitting ? "Saving..." : "Save"}
+              {isSubmitting ? (
+                <span data-testid="loading-indicator">Saving...</span>
+              ) : (
+                "Save"
+              )}
             </button>
           </div>
         </form>

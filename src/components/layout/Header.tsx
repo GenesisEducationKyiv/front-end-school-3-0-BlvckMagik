@@ -11,7 +11,7 @@ export default function Header() {
             href="/"
             className="text-xl font-bold text-foreground hover:text-foreground/80"
           >
-            Музична бібліотека
+            Music Player
           </Link>
         </nav>
       </div>

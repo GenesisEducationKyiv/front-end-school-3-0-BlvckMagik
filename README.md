@@ -1,3 +1,33 @@
+# Music Player App
+
+### Optimistic Updates
+
+The app uses optimistic updates through the `TracksContext` to immediately reflect changes in the UI before server confirmation:
+
+- Track deletion: Immediately removes track from the list
+- Track addition: Instantly shows new track at the top of the list
+- Track updates: Immediately shows edited track details
+
+Implementation can be found in `src/contexts/TracksContext.tsx`
+
+### Audio Visualization
+
+The audio player includes a real-time frequency visualization using Web Audio API:
+
+- Colorful frequency bars that react to the audio in real-time
+- Bars change color based on frequency and playback state
+- Responsive canvas that adjusts to screen width
+- Smooth animations using requestAnimationFrame
+
+Implementation can be found in `src/components/tracks/AudioPlayer.tsx`
+
+Key features:
+
+- Uses AudioContext for audio processing
+- AnalyserNode for frequency data analysis
+- Canvas API for rendering
+- Singleton pattern for AudioContext management
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

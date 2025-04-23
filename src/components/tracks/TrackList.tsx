@@ -68,9 +68,10 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <button
+          data-testid="create-track-button"
           onClick={onCreateTrackClick}
           className="flex items-center gap-2 px-4 py-2 justify-center bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors w-full md:w-auto"
         >
@@ -81,6 +82,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <input
+            data-testid="search-input"
             type="text"
             placeholder="Search by title, artist or album..."
             className="w-full p-2 border rounded"
@@ -90,6 +92,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
 
         <div className="flex gap-2">
           <Select
+            data-testid="sort-select"
             id="sort-select"
             instanceId="sort-select"
             options={sortOptions}
@@ -117,6 +120,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
 
         <div>
           <Select
+            data-testid="filter-genre"
             id="genre-select"
             instanceId="genre-select"
             options={genreOptions}
@@ -133,7 +137,12 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
         </div>
       </div>
       {isLoading ? (
-        <div>Loading...</div>
+        <div data-testid="loading-tracks" className="flex justify-center py-8">
+          <div
+            data-testid="loading-indicator"
+            className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"
+          />
+        </div>
       ) : (
         <div className="flex flex-col gap-8">
           {tracksData?.data.data.map((track: Track) => (
@@ -142,7 +151,10 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
         </div>
       )}
       {tracksData?.data.meta && (
-        <div className="flex justify-center gap-2 mt-4">
+        <div
+          data-testid="pagination"
+          className="flex justify-center gap-2 mt-4"
+        >
           {Array.from({ length: tracksData.data.meta.totalPages }, (_, i) => (
             <button
               key={i + 1}

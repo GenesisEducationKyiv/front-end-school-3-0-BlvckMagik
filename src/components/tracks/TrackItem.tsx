@@ -77,7 +77,7 @@ export default function TrackItem({ track }: TrackItemProps) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Ви впевнені, що хочете видалити цей трек?")) {
+    if (!window.confirm("Are you sure you want to delete this track?")) {
       return;
     }
 
@@ -99,7 +99,11 @@ export default function TrackItem({ track }: TrackItemProps) {
   };
 
   return (
-    <div className="border rounded-lg p-4 flex items-center justify-between">
+    <div
+      data-testid={`track-item-${track.id}`}
+      data-loading={isLoading}
+      className="border rounded-lg p-4 flex items-center justify-between"
+    >
       <div className="flex items-center space-x-4 gap-4 md:gap-6 max-w-[60%] md:max-w-[100%]">
         <Image
           src={track.coverImage || "/default-cover.webp"}
@@ -110,12 +114,14 @@ export default function TrackItem({ track }: TrackItemProps) {
         />
         <div className="grid">
           <h3
+            data-testid={`track-item-${track.id}-title`}
             className="font-semibold truncate whitespace-nowrap"
             title={track.title}
           >
             {track.title}
           </h3>
           <p
+            data-testid={`track-item-${track.id}-artist`}
             className="text-gray-600 truncate whitespace-nowrap"
             title={track.artist}
           >
@@ -146,12 +152,18 @@ export default function TrackItem({ track }: TrackItemProps) {
         {track.audioFile && (
           <>
             {isLoading ? (
-              <div className="h-8 flex items-center">
+              <div
+                data-testid="loading-indicator"
+                className="h-8 flex items-center"
+              >
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-300" />
               </div>
             ) : (
               <button
+                data-testid={`play-track-${track.id}`}
                 onClick={handlePlayClick}
+                disabled={isLoading}
+                aria-disabled={isLoading}
                 className="w-12 h-12 cursor-pointer rounded-full border-2 border-white bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-colors"
               >
                 {isCurrentTrack && isPlaying ? (
@@ -166,13 +178,18 @@ export default function TrackItem({ track }: TrackItemProps) {
         <div className="relative flex" ref={menuRef}>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            disabled={isDeleting}
+            aria-disabled={isDeleting}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <EllipsisVerticalIcon className="w-5 h-5 text-gray-600" />
           </button>
 
           {isMenuOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1">
+            <div
+              data-testid="confirm-dialog"
+              className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1"
+            >
               <button
                 onClick={() => {
                   setIsDetailsModalOpen(true);
@@ -180,23 +197,30 @@ export default function TrackItem({ track }: TrackItemProps) {
                 }}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 text-black transition-colors"
               >
-                Деталі
+                Details
               </button>
               <button
+                data-testid={`edit-track-${track.id}`}
                 onClick={() => {
                   setIsEditModalOpen(true);
                   setIsMenuOpen(false);
                 }}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 text-black transition-colors"
               >
-                Редагувати
+                Edit
               </button>
               <button
+                data-testid={`delete-track-${track.id}`}
                 onClick={handleDelete}
-                className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition-colors"
                 disabled={isDeleting}
+                aria-disabled={isDeleting}
+                className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition-colors"
               >
-                {isDeleting ? <span>Видалення...</span> : "Видалити"}
+                {isDeleting ? (
+                  <span data-testid="loading-indicator">Deleting...</span>
+                ) : (
+                  "Delete"
+                )}
               </button>
             </div>
           )}

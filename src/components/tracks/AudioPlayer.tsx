@@ -317,7 +317,10 @@ export default function AudioPlayer({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0">
+    <div
+      data-testid={`audio-player-${track.id}`}
+      className="fixed bottom-0 left-0 right-0"
+    >
       <div className="w-full bg-secondary">
         <canvas
           ref={canvasRef}
@@ -329,6 +332,7 @@ export default function AudioPlayer({
 
       <div className="w-full bg-secondary backdrop-blur-lg">
         <div
+          data-testid={`audio-progress-mobile-${track.id}`}
           ref={mobileProgressRef}
           className="md:hidden w-full h-1 bg-gray-600 cursor-pointer"
           onClick={handleMobileProgressClick}
@@ -360,6 +364,11 @@ export default function AudioPlayer({
             <div className="flex-1 flex flex-col gap-1">
               <div className="flex items-center gap-4 justify-end md:justify-center">
                 <button
+                  data-testid={
+                    isPlaying
+                      ? `pause-button-${track.id}`
+                      : `play-button-${track.id}`
+                  }
                   onClick={togglePlay}
                   className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/20 hover:bg-primary/30 transition-colors"
                 >
@@ -377,6 +386,7 @@ export default function AudioPlayer({
                 </span>
 
                 <div
+                  data-testid={`audio-progress-${track.id}`}
                   ref={progressRef}
                   className="flex-1 h-1 bg-gray-600 rounded-full cursor-pointer"
                   onClick={handleProgressClick}
