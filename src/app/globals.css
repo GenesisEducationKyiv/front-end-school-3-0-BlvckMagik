@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "tailwindcss";
+
+/*
+  1. Use a more-intuitive box-sizing model.
+*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/*
+  2. Remove default margin
+*/
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/*
+  3. Allow percentage-based heights in the application
+*/
+html,
+body {
+  height: 100%;
+}
+
+/*
+  4. Add accessible line-height
+  5. Improve text rendering
+*/
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+  6. Improve media defaults
+*/
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/*
+  7. Remove built-in form typography styles
+*/
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/*
+  8. Avoid text overflows
+*/
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+.select__control {
+  background-color: transparent !important;
+}
+
+.select__menu {
+  background-color: #1a1a1a !important;
+}
+
+.select__option--is-focused {
+  background: #333333 !important;
+  cursor: pointer;
+}
+
+.select__multi-value__remove svg {
+  fill: #1a1a1a;
+}
+
+.select__multi-value__remove:hover {
+  background-color: #3333334d !important;
+}
+
+#react-select-sort-select-option-0,
+#react-select-sort-select-option-1,
+#react-select-sort-select-option-2,
+#react-select-sort-select-option-3 {
+  color: hsl(0, 0%, 100%) !important;
+}
+
+#genre-select {
+  height: 100% !important;
+}
+
+#sort-select:nth-child(1) > div > div > div {
+  color: rgb(128, 128, 128);
+}
+
+#genre-select > div,
+#sort-select > div {
+  background-color: transparent !important;
+  color: #ededed !important;
+  height: 100% !important;
+}
+
+#react-select-sort-select-listbox,
+#react-select-genre-select-listbox {
+  background: #1a1a1a !important;
+}
+
+#react-select-sort-select-listbox > div:hover,
+#react-select-genre-select-listbox > div:hover {
+  background: #333333 !important;
+  cursor: pointer;
+  background-color: #333333 !important;
+}
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  @apply bg-background text-foreground;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+  padding-bottom: 160px;
+}
