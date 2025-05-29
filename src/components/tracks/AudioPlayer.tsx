@@ -170,7 +170,7 @@ export default function AudioPlayer({
         let x = 0;
 
         for (let i = 0; i < bufferLength; i++) {
-          barHeight = (dataArray[i] / 255) * canvas.height;
+          barHeight = ((dataArray[i] ?? 0) / 255) * canvas.height;
 
           const hue = (i / bufferLength) * 360;
           ctx.fillStyle = isPlaying
@@ -229,7 +229,7 @@ export default function AudioPlayer({
         let x = 0;
 
         for (let i = 0; i < bufferLength; i++) {
-          barHeight = (dataArray[i] / 255) * canvas.height;
+          barHeight = ((dataArray[i] ?? 0) / 255) * canvas.height;
 
           const hue = (i / bufferLength) * 360;
           ctx.fillStyle = isPlaying

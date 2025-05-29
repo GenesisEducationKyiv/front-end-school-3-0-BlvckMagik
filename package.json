@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.2",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9.27.0",
     "@tailwindcss/postcss": "^4.1.4",
     "@types/lodash": "^4.17.16",
     "@types/node": "^20",
@@ -37,6 +39,8 @@
     "eslint-config-next": "15.3.1",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.4",
-    "typescript": "^5"
+    "typescript": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0"
   }
 }
