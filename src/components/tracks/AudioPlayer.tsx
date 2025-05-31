@@ -153,7 +153,9 @@ export default function AudioPlayer({
       if (!canvasRef.current || !analyser) return;
 
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d")!;
+      const context2d = canvas.getContext("2d");
+      if (!context2d) return;
+      const ctx = context2d;
       const bufferLength = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
 
@@ -212,7 +214,9 @@ export default function AudioPlayer({
 
     if (canvasRef.current && analyser) {
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d")!;
+      const context2d = canvas.getContext("2d");
+      if (!context2d) return;
+      const ctx = context2d;
       const bufferLength = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
 

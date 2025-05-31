@@ -3,8 +3,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { debounce } from "lodash";
-import { Track, TrackQueryParams } from "@/types";
-import { trackApi } from "@/lib/api";
+import { type Track, type TrackQueryParams } from "@/lib/validators";
+import { trackApiClient, getErrorMessage } from "@/lib/api-client";
 import TrackItem from "@/components/tracks/TrackItem";
 import Select from "react-select";
 import { PlusIcon } from "@heroicons/react/24/solid";
@@ -29,23 +29,29 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
 
   const { data: tracksData, isLoading } = useQuery({
     queryKey: ["tracks", queryParams],
-    queryFn: () => trackApi.getTracks(queryParams),
+    queryFn: async () => {
+      const result = await trackApiClient.getTracks(queryParams);
+      if (result.isOk()) {
+        return { data: result.value };
+      }
+      throw new Error(getErrorMessage(result.error));
+    },
     staleTime: 1000 * 60,
   });
 
   useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        const response = await trackApi.getGenres();
-        const genres = response.data;
+    const fetchGenres = async (): Promise<void> => {
+      const result = await trackApiClient.getGenres();
+      
+      if (result.isOk()) {
         setGenreOptions(
-          genres.map((genre: string) => ({
+          result.value.map((genre: string) => ({
             value: genre,
             label: genre.charAt(0).toUpperCase() + genre.slice(1),
           }))
         );
-      } catch (error) {
-        console.error("Failed to fetch genres:", error);
+      } else {
+        console.error("Failed to fetch genres:", getErrorMessage(result.error));
       }
     };
 
@@ -55,7 +61,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
   const debouncedSearch = useMemo(
     () =>
       debounce((value: string) => {
-        setQueryParams((prev) => ({ ...prev, search: value, page: 1 }));
+        setQueryParams((prev: TrackQueryParams) => ({ ...prev, search: value, page: 1 }));
       }, 500),
     []
   );
@@ -98,7 +104,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
             options={sortOptions}
             value={sortOptions.find((opt) => opt.value === queryParams.sort)}
             onChange={(option) =>
-              setQueryParams((prev) => ({
+              setQueryParams((prev: TrackQueryParams) => ({
                 ...prev,
                 sort: option?.value || "title",
               }))
@@ -107,7 +113,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
           />
           <button
             onClick={() =>
-              setQueryParams((prev) => ({
+              setQueryParams((prev: TrackQueryParams) => ({
                 ...prev,
                 order: prev.order === "asc" ? "desc" : "asc",
               }))
@@ -127,7 +133,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
             isClearable
             placeholder="Filter by genre"
             onChange={(option) =>
-              setQueryParams((prev) => ({
+              setQueryParams((prev: TrackQueryParams) => ({
                 ...prev,
                 genre: option?.value || "",
                 page: 1,
@@ -159,7 +165,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
             <button
               key={i + 1}
               onClick={() =>
-                setQueryParams((prev) => ({ ...prev, page: i + 1 }))
+                setQueryParams((prev: TrackQueryParams) => ({ ...prev, page: i + 1 }))
               }
               className={`px-3 py-1 rounded cursor-pointer ${
                 queryParams.page === i + 1

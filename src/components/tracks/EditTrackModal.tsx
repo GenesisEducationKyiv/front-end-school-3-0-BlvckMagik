@@ -3,11 +3,9 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Track, TrackFormData } from "@/types";
-import { trackFormSchema } from "@/lib/validators";
-import { uploadTrackFile } from "@/app/actions/tracks";
+import { type Track, type TrackFormData, trackFormSchema } from "@/lib/validators";
+import { trackApiClient, getErrorMessage } from "@/lib/api-client";
 import { useTracks } from "@/contexts/TracksContext";
-import { trackApi } from "@/lib/api";
 import Select from "react-select";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useQueryClient } from "@tanstack/react-query";
@@ -49,18 +47,18 @@ export default function EditTrackModal({
   });
 
   useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        const response = await trackApi.getGenres();
-        const genres = response.data;
+    const fetchGenres = async (): Promise<void> => {
+      const result = await trackApiClient.getGenres();
+      
+      if (result.isOk()) {
         setGenreOptions(
-          genres.map((genre: string) => ({
+          result.value.map((genre: string) => ({
             value: genre,
             label: genre.charAt(0).toUpperCase() + genre.slice(1),
           }))
         );
-      } catch (error) {
-        console.error("Failed to fetch genres:", error);
+      } else {
+        console.error("Failed to fetch genres:", getErrorMessage(result.error));
       }
     };
 
@@ -91,34 +89,48 @@ export default function EditTrackModal({
     validateAudioFile(file);
   };
 
-  const onSubmit = async (data: TrackFormData) => {
+  const onSubmit = async (data: TrackFormData): Promise<void> => {
     if (!validateAudioFile(selectedFile)) return;
 
-    try {
-      setIsSubmitting(true);
+    setIsSubmitting(true);
 
-      if (currentTrack?.track.id === track.id) {
-        stopPlayback();
-      }
-
-      const response = await trackApi.updateTrack(track.id, data);
-      let updatedTrack = response.data;
-
-      if (selectedFile) {
-        updatedTrack = await uploadTrackFile(track.id, selectedFile);
-      }
-
-      updateTrack(updatedTrack);
-
-      queryClient.invalidateQueries({ queryKey: ["tracks"] });
-
-      onClose();
-    } catch (error) {
-      console.error("Failed to update track:", error);
-      window.location.reload();
-    } finally {
-      setIsSubmitting(false);
+    if (currentTrack?.track.id === track.id) {
+      stopPlayback();
     }
+
+    const updateResult = await trackApiClient.updateTrack(track.id, data);
+    
+    if (updateResult.isErr()) {
+      console.error("Failed to update track:", getErrorMessage(updateResult.error));
+      window.location.reload();
+      setIsSubmitting(false);
+      return;
+    }
+
+    let updatedTrack = updateResult.value;
+
+    if (selectedFile) {
+      const uploadResult = await trackApiClient.uploadFile(track.id, selectedFile);
+      
+      if (uploadResult.isErr()) {
+        console.error("Failed to upload file:", getErrorMessage(uploadResult.error));
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const refreshResult = await trackApiClient.getTracks({ page: 1, limit: 1 });
+      if (refreshResult.isOk()) {
+        const refreshedTrack = refreshResult.value.data.find(t => t.id === track.id);
+        if (refreshedTrack) {
+          updatedTrack = refreshedTrack;
+        }
+      }
+    }
+
+    updateTrack(updatedTrack);
+    void queryClient.invalidateQueries({ queryKey: ["tracks"] });
+    onClose();
+    setIsSubmitting(false);
   };
 
   if (!isOpen) return null;

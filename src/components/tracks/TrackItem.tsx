@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Track } from "@/types";
+import { type Track } from "@/lib/validators";
 import EditTrackModal from "@/components/tracks/EditTrackModal";
 import Image from "next/image";
-import { trackApi } from "@/lib/api";
+import { trackApiClient, getErrorMessage } from "@/lib/api-client";
 import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import TrackDetailsModal from "@/components/tracks/TrackDetailsModal";
 import { useTracks } from "@/contexts/TracksContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { isEventTargetElement } from "@/lib/type-guards";
 
 interface TrackItemProps {
   track: Track;
@@ -36,8 +37,8 @@ export default function TrackItem({ track }: TrackItemProps) {
   const isCurrentTrack = currentTrack?.track.id === track.id;
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+    function handleClickOutside(event: MouseEvent): void {
+      if (menuRef.current && event.target && isEventTargetElement(event.target) && !menuRef.current.contains(event.target)) {
         setIsMenuOpen(false);
       }
     }
@@ -48,7 +49,7 @@ export default function TrackItem({ track }: TrackItemProps) {
     };
   }, []);
 
-  const handlePlayClick = async () => {
+  const handlePlayClick = async (): Promise<void> => {
     if (isCurrentTrack) {
       setIsPlaying(!isPlaying);
       return;
@@ -56,46 +57,49 @@ export default function TrackItem({ track }: TrackItemProps) {
 
     if (track.audioFile) {
       setIsLoading(true);
-      try {
-        const url = await trackApi.getAudioFile(track.audioFile);
+      const result = await trackApiClient.getAudioFile(track.audioFile);
+      
+      if (result.isOk()) {
         setCurrentTrack({
-          audioUrl: url,
+          audioUrl: result.value,
           track: {
             title: track.title,
             artist: track.artist,
-            coverImage: track.coverImage || "/default-cover.webp",
+            coverImage: track.coverImage ?? "/default-cover.webp",
             id: track.id,
           },
         });
         setIsPlaying(true);
-      } catch (error) {
-        console.error("Failed to load audio:", error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        console.error("Failed to load audio:", getErrorMessage(result.error));
       }
+      
+      setIsLoading(false);
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<void> => {
     if (!window.confirm("Are you sure you want to delete this track?")) {
       return;
     }
 
-    try {
-      setIsDeleting(true);
-      if (currentTrack?.track.id === track.id) {
-        stopPlayback();
-      }
-      await trackApi.deleteTrack(track.id);
-      deleteTrack(track.id);
-
-      queryClient.invalidateQueries({ queryKey: ["tracks"] });
-    } catch (error) {
-      console.error("Failed to delete track:", error);
-      window.location.reload();
-    } finally {
-      setIsDeleting(false);
+    setIsDeleting(true);
+    
+    if (currentTrack?.track.id === track.id) {
+      stopPlayback();
     }
+    
+    const result = await trackApiClient.deleteTrack(track.id);
+    
+    if (result.isOk()) {
+      deleteTrack(track.id);
+      queryClient.invalidateQueries({ queryKey: ["tracks"] });
+    } else {
+      console.error("Failed to delete track:", getErrorMessage(result.error));
+      window.location.reload();
+    }
+    
+    setIsDeleting(false);
   };
 
   return (

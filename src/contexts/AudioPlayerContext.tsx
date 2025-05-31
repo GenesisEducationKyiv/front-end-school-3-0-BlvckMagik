@@ -2,20 +2,13 @@
 
 import AudioPlayer from "@/components/tracks/AudioPlayer";
 import { createContext, useContext, useState } from "react";
+import type { AudioPlayerState } from "@/lib/validators";
 
 interface AudioPlayerContextType {
-  currentTrack: {
-    audioUrl: string;
-    track: {
-      title: string;
-      artist: string;
-      coverImage?: string;
-      id: string;
-    };
-  } | null;
+  currentTrack: AudioPlayerState | null;
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
-  setCurrentTrack: (track: AudioPlayerContextType["currentTrack"]) => void;
+  setCurrentTrack: (track: AudioPlayerState | null) => void;
   stopPlayback: () => void;
 }
 
@@ -28,8 +21,7 @@ export function AudioPlayerProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [currentTrack, setCurrentTrack] =
-    useState<AudioPlayerContextType["currentTrack"]>(null);
+  const [currentTrack, setCurrentTrack] = useState<AudioPlayerState | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const stopPlayback = () => {

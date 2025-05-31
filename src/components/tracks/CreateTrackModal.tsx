@@ -3,11 +3,9 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TrackFormData } from "@/types";
-import { trackFormSchema } from "@/lib/validators";
-import { uploadTrackFile } from "@/app/actions/tracks";
+import { type TrackFormData, trackFormSchema } from "@/lib/validators";
+import { trackApiClient, getErrorMessage } from "@/lib/api-client";
 import { useTracks } from "@/contexts/TracksContext";
-import { trackApi } from "@/lib/api";
 import Select from "react-select";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -47,18 +45,18 @@ export default function CreateTrackModal({
   });
 
   useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        const response = await trackApi.getGenres();
-        const genres = response.data;
+    const fetchGenres = async (): Promise<void> => {
+      const result = await trackApiClient.getGenres();
+      
+      if (result.isOk()) {
         setGenreOptions(
-          genres.map((genre: string) => ({
+          result.value.map((genre: string) => ({
             value: genre,
             label: genre.charAt(0).toUpperCase() + genre.slice(1),
           }))
         );
-      } catch (error) {
-        console.error("Failed to fetch genres:", error);
+      } else {
+        console.error("Failed to fetch genres:", getErrorMessage(result.error));
       }
     };
 
@@ -89,32 +87,45 @@ export default function CreateTrackModal({
     validateAudioFile(file);
   };
 
-  const onSubmit = async (data: TrackFormData) => {
+  const onSubmit = async (data: TrackFormData): Promise<void> => {
     if (!validateAudioFile(selectedFile)) return;
 
-    try {
-      setIsSubmitting(true);
+    setIsSubmitting(true);
 
-      const response = await trackApi.createTrack(data);
-      const newTrack = response.data;
-
-      if (selectedFile) {
-        const updatedTrack = await uploadTrackFile(newTrack.id, selectedFile);
-        addTrack(updatedTrack);
-      } else {
-        addTrack(newTrack);
-      }
-
-      queryClient.invalidateQueries({ queryKey: ["tracks"] });
-
-      reset();
-      onClose();
-    } catch (error) {
-      console.error("Failed to create track:", error);
+    const createResult = await trackApiClient.createTrack(data);
+    
+    if (createResult.isErr()) {
+      console.error("Failed to create track:", getErrorMessage(createResult.error));
       window.location.reload();
-    } finally {
       setIsSubmitting(false);
+      return;
     }
+
+    let newTrack = createResult.value;
+
+    if (selectedFile) {
+      const uploadResult = await trackApiClient.uploadFile(newTrack.id, selectedFile);
+      
+      if (uploadResult.isErr()) {
+        console.error("Failed to upload file:", getErrorMessage(uploadResult.error));
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const refreshResult = await trackApiClient.getTracks({ page: 1, limit: 1 });
+      if (refreshResult.isOk()) {
+        const refreshedTrack = refreshResult.value.data.find(t => t.id === newTrack.id);
+        if (refreshedTrack) {
+          newTrack = refreshedTrack;
+        }
+      }
+    }
+
+    addTrack(newTrack);
+    queryClient.invalidateQueries({ queryKey: ["tracks"] });
+    reset();
+    onClose();
+    setIsSubmitting(false);
   };
 
   if (!isOpen) return null;
