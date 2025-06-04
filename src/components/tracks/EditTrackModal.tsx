@@ -25,6 +25,7 @@ export default function EditTrackModal({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const { updateTrack } = useTracks();
   const { currentTrack, stopPlayback } = useAudioPlayer();
   const queryClient = useQueryClient();
@@ -75,6 +76,7 @@ export default function EditTrackModal({
     if (!validateAudioFile(selectedFile)) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
     if (currentTrack?.track.id === track.id) {
       stopPlayback();
@@ -84,7 +86,7 @@ export default function EditTrackModal({
     
     if (updateResult.isErr()) {
       console.error("Failed to update track:", getErrorMessage(updateResult.error));
-      window.location.reload();
+      setSubmitError(`Failed to update track: ${getErrorMessage(updateResult.error)}`);
       setIsSubmitting(false);
       return;
     }
@@ -96,6 +98,7 @@ export default function EditTrackModal({
       
       if (uploadResult.isErr()) {
         console.error("Failed to upload file:", getErrorMessage(uploadResult.error));
+        setSubmitError(`Failed to upload file: ${getErrorMessage(uploadResult.error)}`);
         setIsSubmitting(false);
         return;
       }
@@ -111,6 +114,7 @@ export default function EditTrackModal({
 
     updateTrack(updatedTrack);
     void queryClient.invalidateQueries({ queryKey: ["tracks"] });
+    setSubmitError(null);
     onClose();
     setIsSubmitting(false);
   };
@@ -232,6 +236,12 @@ export default function EditTrackModal({
               </p>
             )}
           </div>
+
+          {submitError && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {submitError}
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 mt-4">
             <button

@@ -22,6 +22,7 @@ export default function CreateTrackModal({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const { addTrack } = useTracks();
   const queryClient = useQueryClient();
   const { data: genreOptions = [], isLoading: genresLoading } = useGenres();
@@ -71,12 +72,13 @@ export default function CreateTrackModal({
     if (!validateAudioFile(selectedFile)) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
     const createResult = await trackApiClient.createTrack(data);
     
     if (createResult.isErr()) {
       console.error("Failed to create track:", getErrorMessage(createResult.error));
-      window.location.reload();
+      setSubmitError(`Failed to create track: ${getErrorMessage(createResult.error)}`);
       setIsSubmitting(false);
       return;
     }
@@ -88,6 +90,7 @@ export default function CreateTrackModal({
       
       if (uploadResult.isErr()) {
         console.error("Failed to upload file:", getErrorMessage(uploadResult.error));
+        setSubmitError(`Failed to upload file: ${getErrorMessage(uploadResult.error)}`);
         setIsSubmitting(false);
         return;
       }
@@ -104,6 +107,8 @@ export default function CreateTrackModal({
     addTrack(newTrack);
     void queryClient.invalidateQueries({ queryKey: ["tracks"] });
     reset();
+    setSelectedFile(null);
+    setSubmitError(null);
     onClose();
     setIsSubmitting(false);
   };
@@ -220,6 +225,12 @@ export default function CreateTrackModal({
               </p>
             )}
           </div>
+
+          {submitError && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {submitError}
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 mt-4">
             <button

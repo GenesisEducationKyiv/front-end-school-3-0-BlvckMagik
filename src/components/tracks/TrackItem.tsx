@@ -22,6 +22,8 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const {
     setCurrentTrack,
@@ -31,7 +33,6 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
     stopPlayback,
   } = useAudioPlayer();
   const { deleteTrack } = useTracks();
-  const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
 
   const isCurrentTrack = currentTrack?.track.id === track.id;
@@ -88,6 +89,7 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
     }
 
     setIsDeleting(true);
+    setDeleteError(null);
     
     if (currentTrack?.track.id === track.id) {
       stopPlayback();
@@ -100,7 +102,7 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
       void queryClient.invalidateQueries({ queryKey: ["tracks"] });
     } else {
       console.error("Failed to delete track:", getErrorMessage(result.error));
-      window.location.reload();
+      setDeleteError(`Failed to delete track: ${getErrorMessage(result.error)}`);
     }
     
     setIsDeleting(false);
@@ -157,6 +159,12 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
       </div>
 
       <div className="flex space-x-2 gap-2 md:gap-6">
+        {deleteError && (
+          <div className="absolute top-0 left-0 right-0 bg-red-100 border border-red-400 text-red-700 px-2 py-1 rounded text-xs">
+            {deleteError}
+          </div>
+        )}
+        
         {track.audioFile && (
           <>
             {isLoading ? (
