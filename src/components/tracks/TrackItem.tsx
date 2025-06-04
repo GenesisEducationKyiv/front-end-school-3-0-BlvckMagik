@@ -55,7 +55,6 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
       return;
     }
 
-    // Stop current track if any
     if (currentTrack) {
       setIsPlaying(false);
     }
@@ -74,7 +73,6 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
             id: track.id,
           },
         });
-        // Start playing the new track
         setIsPlaying(true);
       } else {
         console.error("Failed to load audio:", getErrorMessage(result.error));

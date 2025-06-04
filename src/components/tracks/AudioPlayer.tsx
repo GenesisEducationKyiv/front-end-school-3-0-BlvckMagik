@@ -1,101 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
-
-class AudioContextManager {
-  private static instance: AudioContextManager | null = null;
-  private audioContext: AudioContext | null = null;
-  private sourceNode: MediaElementAudioSourceNode | null = null;
-  private analyserNode: AnalyserNode | null = null;
-  private connectedElement: HTMLAudioElement | null = null;
-
-  private constructor() {}
-
-  public static getInstance(): AudioContextManager {
-    if (!AudioContextManager.instance) {
-      AudioContextManager.instance = new AudioContextManager();
-    }
-    return AudioContextManager.instance;
-  }
-
-  public initialize(audioElement: HTMLAudioElement): {
-    context: AudioContext;
-    analyser: AnalyserNode;
-  } {
-    if (this.audioContext && this.connectedElement === audioElement && this.analyserNode) {
-      return {
-        context: this.audioContext,
-        analyser: this.analyserNode,
-      };
-    }
-
-    if (this.audioContext) {
-      this.cleanup();
-    }
-
-    this.audioContext = new AudioContext();
-    this.sourceNode = this.audioContext.createMediaElementSource(audioElement);
-    this.analyserNode = this.audioContext.createAnalyser();
-
-    this.sourceNode.connect(this.analyserNode);
-    this.analyserNode.connect(this.audioContext.destination);
-
-    this.connectedElement = audioElement;
-
-    return {
-      context: this.audioContext,
-      analyser: this.analyserNode,
-    };
-  }
-
-  public getAnalyser(): AnalyserNode | null {
-    return this.analyserNode;
-  }
-
-  public getContext(): AudioContext | null {
-    return this.audioContext;
-  }
-
-  public isElementConnected(element: HTMLAudioElement): boolean {
-    return this.connectedElement === element;
-  }
-
-  public cleanup(): void {
-    if (this.sourceNode) {
-      this.sourceNode.disconnect();
-      this.sourceNode = null;
-    }
-
-    if (this.analyserNode) {
-      this.analyserNode.disconnect();
-      this.analyserNode = null;
-    }
-
-    if (this.audioContext && this.audioContext.state !== "closed") {
-      void this.audioContext.close();
-      this.audioContext = null;
-    }
-
-    this.connectedElement = null;
-  }
-
-  public reset(): void {
-    this.cleanup();
-    AudioContextManager.instance = null;
-  }
-
-  public static resetInstance(): void {
-    if (AudioContextManager.instance) {
-      AudioContextManager.instance.cleanup();
-      AudioContextManager.instance = null;
-    }
-  }
-
-  public getConnectedElement(): HTMLAudioElement | null {
-    return this.connectedElement;
-  }
-}
+import { useAudioContextManager } from "@/contexts/AudioContextProvider";
 
 interface AudioPlayerProps {
   audioUrl: string;
@@ -122,25 +29,22 @@ export default function AudioPlayer({
   const progressRef = useRef<HTMLDivElement>(null);
   const mobileProgressRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
-  const contextManagerRef = useRef<AudioContextManager>(
-    AudioContextManager.getInstance()
-  );
+  
+  const audioContext = useAudioContextManager();
 
   const initializeAudioContext = (): void => {
     if (!audioRef.current) return;
 
-    const manager = contextManagerRef.current;
-    manager.initialize(audioRef.current);
+    audioContext.initialize(audioRef.current);
     
-    const analyser = manager.getAnalyser();
+    const analyser = audioContext.getAnalyser();
     if (analyser) {
       startVisualization();
     }
   };
 
   const startVisualization = (): void => {
-    const manager = contextManagerRef.current;
-    const analyser = manager.getAnalyser();
+    const analyser = audioContext.getAnalyser();
 
     if (!canvasRef.current || !analyser) return;
 
@@ -177,7 +81,6 @@ export default function AudioPlayer({
     draw();
   };
 
-  // Reset audio when track changes
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -219,8 +122,7 @@ export default function AudioPlayer({
   }, [audioUrl]);
 
   useEffect(() => {
-    const manager = contextManagerRef.current;
-    const analyser = manager.getAnalyser();
+    const analyser = audioContext.getAnalyser();
     
     if (analyser) {
       startVisualization();
@@ -261,13 +163,13 @@ export default function AudioPlayer({
 
   useEffect(() => {
     return () => {
-      contextManagerRef.current.cleanup();
+      audioContext.cleanup();
 
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, []);
+  }, [audioContext]);
 
   const togglePlay = (): void => {
     setIsPlaying(!isPlaying);
