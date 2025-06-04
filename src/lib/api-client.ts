@@ -53,7 +53,7 @@ function handleApiError(error: unknown): ApiClientError {
     
     return {
       type: "network",
-      message: error["message"] ?? "Network error occurred",
+      message: error.message || "Network error occurred",
       originalError: error,
     };
   }
@@ -197,7 +197,7 @@ export const trackApiClient = {
       })
     );
 
-    return result.map((blob) => URL.createObjectURL(blob));
+    return result.map((blob) => URL.createObjectURL(blob as Blob));
   },
 
   async getGenres(): Promise<ApiResult<string[]>> {

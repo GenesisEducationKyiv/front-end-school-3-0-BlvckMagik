@@ -21,7 +21,7 @@ export default function EditTrackModal({
   isOpen,
   onClose,
   track,
-}: EditTrackModalProps) {
+}: EditTrackModalProps): React.JSX.Element | null {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,7 +68,7 @@ export default function EditTrackModal({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setSelectedFile(file);
-    validateAudioFile(file);
+    void validateAudioFile(file);
   };
 
   const onSubmit = async (data: TrackFormData): Promise<void> => {
@@ -124,7 +124,9 @@ export default function EditTrackModal({
 
         <form
           data-testid="track-form"
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={(e) => {
+            void handleSubmit(onSubmit)(e);
+          }}
           className="space-y-4"
         >
           <div>

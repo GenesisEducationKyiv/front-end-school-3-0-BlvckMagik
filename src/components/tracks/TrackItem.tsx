@@ -17,7 +17,7 @@ interface TrackItemProps {
   track: Track;
 }
 
-export default function TrackItem({ track }: TrackItemProps) {
+export default function TrackItem({ track }: TrackItemProps): React.JSX.Element {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,6 +55,11 @@ export default function TrackItem({ track }: TrackItemProps) {
       return;
     }
 
+    // Stop current track if any
+    if (currentTrack) {
+      setIsPlaying(false);
+    }
+
     if (track.audioFile) {
       setIsLoading(true);
       const result = await trackApiClient.getAudioFile(track.audioFile);
@@ -69,6 +74,7 @@ export default function TrackItem({ track }: TrackItemProps) {
             id: track.id,
           },
         });
+        // Start playing the new track
         setIsPlaying(true);
       } else {
         console.error("Failed to load audio:", getErrorMessage(result.error));
@@ -93,7 +99,7 @@ export default function TrackItem({ track }: TrackItemProps) {
     
     if (result.isOk()) {
       deleteTrack(track.id);
-      queryClient.invalidateQueries({ queryKey: ["tracks"] });
+      void queryClient.invalidateQueries({ queryKey: ["tracks"] });
     } else {
       console.error("Failed to delete track:", getErrorMessage(result.error));
       window.location.reload();
@@ -165,7 +171,9 @@ export default function TrackItem({ track }: TrackItemProps) {
             ) : (
               <button
                 data-testid={`play-track-${track.id}`}
-                onClick={handlePlayClick}
+                onClick={() => {
+                  void handlePlayClick();
+                }}
                 disabled={isLoading}
                 aria-disabled={isLoading}
                 className="w-12 h-12 cursor-pointer rounded-full border-2 border-white bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-colors"
@@ -215,7 +223,9 @@ export default function TrackItem({ track }: TrackItemProps) {
               </button>
               <button
                 data-testid={`delete-track-${track.id}`}
-                onClick={handleDelete}
+                onClick={() => {
+                  void handleDelete();
+                }}
                 disabled={isDeleting}
                 aria-disabled={isDeleting}
                 className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition-colors"

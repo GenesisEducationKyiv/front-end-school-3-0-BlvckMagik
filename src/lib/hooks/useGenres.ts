@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { trackApiClient, getErrorMessage } from "@/lib/api-client";
 
 export interface GenreOption {
@@ -6,7 +6,7 @@ export interface GenreOption {
   label: string;
 }
 
-export const useGenres = () => {
+export const useGenres = (): UseQueryResult<GenreOption[]> => {
   return useQuery({
     queryKey: ["genres"],
     queryFn: async (): Promise<GenreOption[]> => {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import CreateTrackModal from "@/components/tracks/CreateTrackModal";
 import TracksList from "@/components/tracks/TrackList";
 
-export default function TracksPage() {
+export default function TracksPage(): React.JSX.Element {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   return (

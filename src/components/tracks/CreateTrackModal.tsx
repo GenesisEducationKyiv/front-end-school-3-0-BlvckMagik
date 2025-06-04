@@ -18,7 +18,7 @@ interface CreateTrackModalProps {
 export default function CreateTrackModal({
   isOpen,
   onClose,
-}: CreateTrackModalProps) {
+}: CreateTrackModalProps): React.JSX.Element | null {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,8 +43,6 @@ export default function CreateTrackModal({
     },
   });
 
-
-
   const validateAudioFile = (file: File | null): boolean => {
     if (!file) return true;
 
@@ -63,10 +61,10 @@ export default function CreateTrackModal({
     return true;
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0] || null;
     setSelectedFile(file);
-    validateAudioFile(file);
+    void validateAudioFile(file);
   };
 
   const onSubmit = async (data: TrackFormData): Promise<void> => {
@@ -104,7 +102,7 @@ export default function CreateTrackModal({
     }
 
     addTrack(newTrack);
-    queryClient.invalidateQueries({ queryKey: ["tracks"] });
+    void queryClient.invalidateQueries({ queryKey: ["tracks"] });
     reset();
     onClose();
     setIsSubmitting(false);
@@ -119,7 +117,9 @@ export default function CreateTrackModal({
 
         <form
           data-testid="track-form"
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={(e) => {
+            void handleSubmit(onSubmit)(e);
+          }}
           className="space-y-4"
         >
           <div>

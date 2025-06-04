@@ -46,10 +46,6 @@ export function AudioPlayerProvider({
           track={currentTrack.track}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
-          onClose={() => {
-            setCurrentTrack(null);
-            setIsPlaying(false);
-          }}
         />
       )}
     </AudioPlayerContext.Provider>

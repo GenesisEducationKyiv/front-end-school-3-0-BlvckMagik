@@ -41,28 +41,18 @@ export default [
       "@typescript-eslint": tseslint,
     },
     rules: {
-      ...tseslint.configs.strict.rules,
-      "@typescript-eslint/no-explicit-any": "error",
+      // Use strictTypeChecked rules as base - these include all the rules we had manually
+      ...tseslint.configs["strict-type-checked"].rules,
+      
+      // Custom overrides for project-specific preferences
       "@typescript-eslint/explicit-function-return-type": "warn",
-      "@typescript-eslint/strict-boolean-expressions": "warn",
-      "@typescript-eslint/no-unused-vars": "error",
-      "@typescript-eslint/no-floating-promises": "warn",
-      "@typescript-eslint/await-thenable": "error",
-      "@typescript-eslint/no-misused-promises": "warn",
-      "@typescript-eslint/prefer-nullish-coalescing": "warn",
-      "@typescript-eslint/prefer-optional-chain": "warn",
-      "@typescript-eslint/no-unnecessary-condition": "warn",
-      "@typescript-eslint/no-unnecessary-type-assertion": "error",
-      "@typescript-eslint/no-unsafe-assignment": "error",
-      "@typescript-eslint/no-unsafe-call": "error",
-      "@typescript-eslint/no-unsafe-member-access": "error",
-      "@typescript-eslint/no-unsafe-return": "error",
-      "@typescript-eslint/restrict-template-expressions": "warn",
-      "@typescript-eslint/prefer-readonly": "warn",
       "@typescript-eslint/prefer-readonly-parameter-types": "off",
       "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
-      "@typescript-eslint/consistent-type-imports": "warn",
-      "@typescript-eslint/no-import-type-side-effects": "warn",
+      
+      // Adjust for React/Next.js patterns
+      "@typescript-eslint/no-confusing-void-expression": ["error", { 
+        "ignoreArrowShorthand": true 
+      }],
     },
   },
 ];
