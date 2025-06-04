@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type TrackFormData, trackFormSchema } from "@/lib/validators";
@@ -8,6 +8,7 @@ import { trackApiClient, getErrorMessage } from "@/lib/api-client";
 import { useTracks } from "@/contexts/TracksContext";
 import Select from "react-select";
 import { useQueryClient } from "@tanstack/react-query";
+import { useGenres } from "@/lib/hooks/useGenres";
 
 interface CreateTrackModalProps {
   isOpen: boolean;
@@ -21,11 +22,9 @@ export default function CreateTrackModal({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [genreOptions, setGenreOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
   const { addTrack } = useTracks();
   const queryClient = useQueryClient();
+  const { data: genreOptions = [], isLoading: genresLoading } = useGenres();
 
   const {
     register,
@@ -44,24 +43,7 @@ export default function CreateTrackModal({
     },
   });
 
-  useEffect(() => {
-    const fetchGenres = async (): Promise<void> => {
-      const result = await trackApiClient.getGenres();
-      
-      if (result.isOk()) {
-        setGenreOptions(
-          result.value.map((genre: string) => ({
-            value: genre,
-            label: genre.charAt(0).toUpperCase() + genre.slice(1),
-          }))
-        );
-      } else {
-        console.error("Failed to fetch genres:", getErrorMessage(result.error));
-      }
-    };
 
-    fetchGenres();
-  }, []);
 
   const validateAudioFile = (file: File | null): boolean => {
     if (!file) return true;
@@ -200,6 +182,7 @@ export default function CreateTrackModal({
               data-testid="genre-selector"
               isMulti
               options={genreOptions}
+              isLoading={genresLoading}
               className="basic-multi-select bg-transparent"
               classNamePrefix="select"
               onChange={(selectedOptions) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { debounce } from "lodash";
 import { type Track, type TrackQueryParams } from "@/lib/validators";
@@ -8,15 +8,13 @@ import { trackApiClient, getErrorMessage } from "@/lib/api-client";
 import TrackItem from "@/components/tracks/TrackItem";
 import Select from "react-select";
 import { PlusIcon } from "@heroicons/react/24/solid";
+import { useGenres } from "@/lib/hooks/useGenres";
 
 interface TracksListProps {
   onCreateTrackClick: () => void;
 }
 
 export default function TracksList({ onCreateTrackClick }: TracksListProps) {
-  const [genreOptions, setGenreOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
   const [queryParams, setQueryParams] = useState<TrackQueryParams>({
     page: 1,
     limit: 10,
@@ -26,6 +24,8 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
     genre: "",
     artist: "",
   });
+
+  const { data: genreOptions = [], isLoading: genresLoading } = useGenres();
 
   const { data: tracksData, isLoading } = useQuery({
     queryKey: ["tracks", queryParams],
@@ -38,25 +38,6 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
     },
     staleTime: 1000 * 60,
   });
-
-  useEffect(() => {
-    const fetchGenres = async (): Promise<void> => {
-      const result = await trackApiClient.getGenres();
-      
-      if (result.isOk()) {
-        setGenreOptions(
-          result.value.map((genre: string) => ({
-            value: genre,
-            label: genre.charAt(0).toUpperCase() + genre.slice(1),
-          }))
-        );
-      } else {
-        console.error("Failed to fetch genres:", getErrorMessage(result.error));
-      }
-    };
-
-    fetchGenres();
-  }, []);
 
   const debouncedSearch = useMemo(
     () =>
@@ -130,6 +111,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
             id="genre-select"
             instanceId="genre-select"
             options={genreOptions}
+            isLoading={genresLoading}
             isClearable
             placeholder="Filter by genre"
             onChange={(option) =>
