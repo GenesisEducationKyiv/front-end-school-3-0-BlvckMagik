@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import { Track, PaginatedResponse } from "@/types";
+import { type Track, type PaginatedResponse } from "@/lib/validators";
 
 interface TracksContextType {
   tracks: PaginatedResponse<Track> | null;

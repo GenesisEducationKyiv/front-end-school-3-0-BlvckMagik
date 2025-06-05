@@ -1,16 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Track, TrackFormData } from "@/types";
-import { trackFormSchema } from "@/lib/validators";
-import { uploadTrackFile } from "@/app/actions/tracks";
+import { type Track, type TrackFormData, trackFormSchema } from "@/lib/validators";
+import { trackApiClient, getErrorMessage } from "@/lib/api-client";
 import { useTracks } from "@/contexts/TracksContext";
-import { trackApi } from "@/lib/api";
 import Select from "react-select";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { useGenres } from "@/lib/hooks/useGenres";
 
 interface EditTrackModalProps {
   isOpen: boolean;
@@ -22,16 +21,15 @@ export default function EditTrackModal({
   isOpen,
   onClose,
   track,
-}: EditTrackModalProps) {
+}: EditTrackModalProps): React.JSX.Element | null {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [genreOptions, setGenreOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const { updateTrack } = useTracks();
   const { currentTrack, stopPlayback } = useAudioPlayer();
   const queryClient = useQueryClient();
+  const { data: genreOptions = [], isLoading: genresLoading } = useGenres();
   const {
     register,
     handleSubmit,
@@ -48,24 +46,7 @@ export default function EditTrackModal({
     },
   });
 
-  useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        const response = await trackApi.getGenres();
-        const genres = response.data;
-        setGenreOptions(
-          genres.map((genre: string) => ({
-            value: genre,
-            label: genre.charAt(0).toUpperCase() + genre.slice(1),
-          }))
-        );
-      } catch (error) {
-        console.error("Failed to fetch genres:", error);
-      }
-    };
 
-    fetchGenres();
-  }, []);
 
   const validateAudioFile = (file: File | null): boolean => {
     if (!file) return true;
@@ -88,37 +69,54 @@ export default function EditTrackModal({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setSelectedFile(file);
-    validateAudioFile(file);
+    void validateAudioFile(file);
   };
 
-  const onSubmit = async (data: TrackFormData) => {
+  const onSubmit = async (data: TrackFormData): Promise<void> => {
     if (!validateAudioFile(selectedFile)) return;
 
-    try {
-      setIsSubmitting(true);
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-      if (currentTrack?.track.id === track.id) {
-        stopPlayback();
-      }
-
-      const response = await trackApi.updateTrack(track.id, data);
-      let updatedTrack = response.data;
-
-      if (selectedFile) {
-        updatedTrack = await uploadTrackFile(track.id, selectedFile);
-      }
-
-      updateTrack(updatedTrack);
-
-      queryClient.invalidateQueries({ queryKey: ["tracks"] });
-
-      onClose();
-    } catch (error) {
-      console.error("Failed to update track:", error);
-      window.location.reload();
-    } finally {
-      setIsSubmitting(false);
+    if (currentTrack?.track.id === track.id) {
+      stopPlayback();
     }
+
+    const updateResult = await trackApiClient.updateTrack(track.id, data);
+    
+    if (updateResult.isErr()) {
+      console.error("Failed to update track:", getErrorMessage(updateResult.error));
+      setSubmitError(`Failed to update track: ${getErrorMessage(updateResult.error)}`);
+      setIsSubmitting(false);
+      return;
+    }
+
+    let updatedTrack = updateResult.value;
+
+    if (selectedFile) {
+      const uploadResult = await trackApiClient.uploadFile(track.id, selectedFile);
+      
+      if (uploadResult.isErr()) {
+        console.error("Failed to upload file:", getErrorMessage(uploadResult.error));
+        setSubmitError(`Failed to upload file: ${getErrorMessage(uploadResult.error)}`);
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const refreshResult = await trackApiClient.getTracks({ page: 1, limit: 1 });
+      if (refreshResult.isOk()) {
+        const refreshedTrack = refreshResult.value.data.find(t => t.id === track.id);
+        if (refreshedTrack) {
+          updatedTrack = refreshedTrack;
+        }
+      }
+    }
+
+    updateTrack(updatedTrack);
+    void queryClient.invalidateQueries({ queryKey: ["tracks"] });
+    setSubmitError(null);
+    onClose();
+    setIsSubmitting(false);
   };
 
   if (!isOpen) return null;
@@ -130,7 +128,9 @@ export default function EditTrackModal({
 
         <form
           data-testid="track-form"
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={(e) => {
+            void handleSubmit(onSubmit)(e);
+          }}
           className="space-y-4"
         >
           <div>
@@ -194,6 +194,7 @@ export default function EditTrackModal({
               data-testid="genre-selector"
               isMulti
               options={genreOptions}
+              isLoading={genresLoading}
               defaultValue={track.genres.map((genre) => ({
                 value: genre,
                 label: genre.charAt(0).toUpperCase() + genre.slice(1),
@@ -235,6 +236,12 @@ export default function EditTrackModal({
               </p>
             )}
           </div>
+
+          {submitError && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {submitError}
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 mt-4">
             <button

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Track } from "@/types";
+import type { Track } from "@/lib/validators";
 interface TrackDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -10,7 +10,7 @@ export default function TrackDetailsModal({
   isOpen,
   onClose,
   track,
-}: TrackDetailsModalProps) {
+}: TrackDetailsModalProps): React.ReactElement | null {
   if (!isOpen) return null;
 
   return (
@@ -21,7 +21,7 @@ export default function TrackDetailsModal({
         <div className="space-y-4">
           <div className="flex items-center gap-4 mb-4">
             <Image
-              src={track.coverImage || "/default-cover.webp"}
+              src={track.coverImage ?? "/default-cover.webp"}
               alt={track.title}
               width={96}
               height={96}
@@ -30,7 +30,7 @@ export default function TrackDetailsModal({
             <div>
               <h3 className="font-semibold">{track.title}</h3>
               <p className="text-gray-400">{track.artist}</p>
-              {track.album && (
+              {track.album != null && track.album !== "" && (
                 <p className="text-gray-500 text-sm">{track.album}</p>
               )}
             </div>
