@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useRef, useCallback, ReactNode } from "react";
 
+const DEFAULT_FFT_SIZE = 256;
+
 interface AudioContextState {
   context: AudioContext | null;
   sourceNode: MediaElementAudioSourceNode | null;
@@ -63,7 +65,7 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     const context = new AudioContext();
     const analyserNode = context.createAnalyser();
     
-    analyserNode.fftSize = 256;
+    analyserNode.fftSize = DEFAULT_FFT_SIZE;
 
     const sourceNode = context.createMediaElementSource(audioElement);
     

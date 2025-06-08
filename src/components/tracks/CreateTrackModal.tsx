@@ -96,8 +96,10 @@ export default function CreateTrackModal({
       }
       
       const refreshResult = await trackApiClient.getTracks({ page: 1, limit: 1 });
-      if (refreshResult.isOk()) {
-        const refreshedTrack = refreshResult.value.data.find(t => t.id === newTrack.id);
+      if (refreshResult.isErr()) {
+        console.warn("Failed to refresh track data");
+      } else {
+        const refreshedTrack = refreshResult.value.data.find(track => track.id === newTrack.id);
         if (refreshedTrack) {
           newTrack = refreshedTrack;
         }

@@ -13,11 +13,40 @@ import {
 } from "@/lib/validators";
 import { isAxiosError, assertExists } from "@/lib/type-guards";
 
-export type ApiClientError = 
-  | { type: "network"; message: string; originalError: unknown }
-  | { type: "validation"; message: string; details: string[] }
-  | { type: "api"; error: ApiError }
-  | { type: "unknown"; message: string };
+// API Endpoints
+const ENDPOINTS = {
+  TRACKS: "/tracks",
+  GENRES: "/genres",
+  TRACKS_BY_ID: (id: string) => `/tracks/${id}`,
+  UPLOAD_FILE: (id: string) => `/tracks/${id}/upload`,
+  DELETE_FILE: (id: string) => `/tracks/${id}/file`,
+  FILES: (fileName: string) => `/files/${fileName}`,
+} as const;
+
+// Error Types
+export interface NetworkError {
+  type: "network";
+  message: string;
+  originalError: unknown;
+}
+
+export interface ValidationError {
+  type: "validation";
+  message: string;
+  details: string[];
+}
+
+export interface ApiClientApiError {
+  type: "api";
+  error: ApiError;
+}
+
+export interface UnknownError {
+  type: "unknown";
+  message: string;
+}
+
+export type ApiClientError = NetworkError | ValidationError | ApiClientApiError | UnknownError;
 
 export type ApiResult<T> = Result<T, ApiClientError>;
 
@@ -39,7 +68,7 @@ api.interceptors.response.use(
 
 function handleApiError(error: unknown): ApiClientError {
   if (isAxiosError(error)) {
-    if (error.response?.data != null) {
+    if (error.response?.data !== null && error.response?.data !== undefined) {
       try {
         const parseResult = parseApiError(error.response.data);
         return {
@@ -79,7 +108,7 @@ async function safeApiCall<T>(
 export const trackApiClient = {
   async getTracks(params: TrackQueryParams): Promise<ApiResult<PaginatedResponse<Track>>> {
     const result = await safeApiCall(() => 
-      api.get<unknown>("/tracks", { params })
+      api.get<unknown>(ENDPOINTS.TRACKS, { params })
     );
 
     return result.andThen((data) => {
@@ -98,7 +127,7 @@ export const trackApiClient = {
 
   async createTrack(data: CreateTrackDto): Promise<ApiResult<Track>> {
     const result = await safeApiCall(() => 
-      api.post<unknown>("/tracks", data)
+      api.post<unknown>(ENDPOINTS.TRACKS, data)
     );
 
     return result.andThen((responseData) => {
@@ -119,7 +148,7 @@ export const trackApiClient = {
     assertExists(id, "Track ID is required for update");
     
     const result = await safeApiCall(() => 
-      api.put<unknown>(`/tracks/${id}`, data)
+      api.put<unknown>(ENDPOINTS.TRACKS_BY_ID(id), data)
     );
 
     return result.andThen((responseData) => {
@@ -140,7 +169,7 @@ export const trackApiClient = {
     assertExists(id, "Track ID is required for deletion");
     
     const trackResult = await safeApiCall(() => 
-      api.get<unknown>(`/tracks/${id}`)
+      api.get<unknown>(ENDPOINTS.TRACKS_BY_ID(id))
     );
 
     if (trackResult.isErr()) {
@@ -151,9 +180,9 @@ export const trackApiClient = {
     if (parseResult.success) {
       const track = parseResult.data;
       
-      if (track.audioFile != null && track.audioFile !== "") {
+      if (track.audioFile !== undefined && track.audioFile !== "") {
         const deleteFileResult = await safeApiCall(() => 
-          api.delete(`/tracks/${id}/file`)
+          api.delete(ENDPOINTS.DELETE_FILE(id))
         );
         
         if (deleteFileResult.isErr()) {
@@ -163,7 +192,7 @@ export const trackApiClient = {
     }
 
     const deleteResult = await safeApiCall(() => 
-      api.delete(`/tracks/${id}`)
+      api.delete(ENDPOINTS.TRACKS_BY_ID(id))
     );
 
     return deleteResult.map(() => undefined);
@@ -177,7 +206,7 @@ export const trackApiClient = {
     formData.append("audioFile", file);
 
     const result = await safeApiCall(() => 
-      api.post<{ audioFile: string }>(`/tracks/${id}/upload`, formData, {
+      api.post<{ audioFile: string }>(ENDPOINTS.UPLOAD_FILE(id), formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -192,7 +221,7 @@ export const trackApiClient = {
     assertExists(fileName, "File name is required");
 
     const result = await safeApiCall(() => 
-      api.get(`/files/${fileName}`, {
+      api.get(ENDPOINTS.FILES(fileName), {
         responseType: "blob",
       })
     );
@@ -202,7 +231,7 @@ export const trackApiClient = {
 
   async getGenres(): Promise<ApiResult<string[]>> {
     const result = await safeApiCall(() => 
-      api.get<string[]>("/genres")
+      api.get<string[]>(ENDPOINTS.GENRES)
     );
 
     return result;
@@ -226,10 +255,10 @@ export function isRetryableError(error: ApiClientError): boolean {
   return error.type === "network";
 }
 
-export function isValidationError(error: ApiClientError): error is { type: "validation"; message: string; details: string[] } {
+export function isValidationError(error: ApiClientError): error is ValidationError {
   return error.type === "validation";
 }
 
-export function isApiError(error: ApiClientError): error is { type: "api"; error: ApiError } {
+export function isApiError(error: ApiClientError): error is ApiClientApiError {
   return error.type === "api";
 } 

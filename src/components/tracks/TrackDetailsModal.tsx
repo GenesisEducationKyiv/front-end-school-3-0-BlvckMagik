@@ -30,7 +30,7 @@ export default function TrackDetailsModal({
             <div>
               <h3 className="font-semibold">{track.title}</h3>
               <p className="text-gray-400">{track.artist}</p>
-              {track.album != null && track.album !== "" && (
+              {track.album && (
                 <p className="text-gray-500 text-sm">{track.album}</p>
               )}
             </div>

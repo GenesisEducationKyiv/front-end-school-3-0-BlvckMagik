@@ -105,7 +105,7 @@ export default function EditTrackModal({
       
       const refreshResult = await trackApiClient.getTracks({ page: 1, limit: 1 });
       if (refreshResult.isOk()) {
-        const refreshedTrack = refreshResult.value.data.find(t => t.id === track.id);
+        const refreshedTrack = refreshResult.value.data.find(refreshedItem => refreshedItem.id === track.id);
         if (refreshedTrack) {
           updatedTrack = refreshedTrack;
         }

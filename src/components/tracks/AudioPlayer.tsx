@@ -22,8 +22,8 @@ export default function AudioPlayer({
   isPlaying,
   setIsPlaying,
 }: AudioPlayerProps): React.JSX.Element {
-  const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -32,7 +32,7 @@ export default function AudioPlayer({
   
   const audioContext = useAudioContextManager();
 
-  const initializeAudioContext = (): void => {
+  const initializeAudioContext = () => {
     if (!audioRef.current) return;
 
     audioContext.initialize(audioRef.current);
@@ -43,7 +43,7 @@ export default function AudioPlayer({
     }
   };
 
-  const startVisualization = (): void => {
+  const startVisualization = () => {
     const analyser = audioContext.getAnalyser();
 
     if (!canvasRef.current || !analyser) return;
@@ -55,7 +55,7 @@ export default function AudioPlayer({
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
-    const draw = (): void => {
+    const draw = () => {
       animationFrameRef.current = requestAnimationFrame(draw);
       analyser.getByteFrequencyData(dataArray);
 
@@ -92,11 +92,11 @@ export default function AudioPlayer({
   useEffect(() => {
     if (!audioRef.current || !audioUrl) return;
 
-    const handleCanPlay = (): void => {
+    const handleCanPlay = () => {
       initializeAudioContext();
     };
 
-    const handleLoadedMetadata = (): void => {
+    const handleLoadedMetadata = () => {
       if (audioRef.current) {
         setDuration(audioRef.current.duration);
       }
@@ -139,7 +139,7 @@ export default function AudioPlayer({
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handleTimeUpdate = (): void => setCurrentTime(audio.currentTime);
+    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
 
     audio.addEventListener("timeupdate", handleTimeUpdate);
 
@@ -171,11 +171,11 @@ export default function AudioPlayer({
     };
   }, [audioContext]);
 
-  const togglePlay = (): void => {
+  const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
 
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>): void => {
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!audioRef.current || !progressRef.current) return;
 
     const progressRect = progressRef.current.getBoundingClientRect();
@@ -183,7 +183,7 @@ export default function AudioPlayer({
     audioRef.current.currentTime = percent * duration;
   };
 
-  const handleMobileProgressClick = (e: React.MouseEvent<HTMLDivElement>): void => {
+  const handleMobileProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!audioRef.current || !mobileProgressRef.current) return;
 
     const progressRect = mobileProgressRef.current.getBoundingClientRect();
