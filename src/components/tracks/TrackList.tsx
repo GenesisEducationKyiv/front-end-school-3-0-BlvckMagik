@@ -77,9 +77,8 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2" data-testid="sort-select">
           <Select
-            data-testid="sort-select"
             id="sort-select"
             instanceId="sort-select"
             options={sortOptions}
@@ -101,13 +100,12 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
             }
             className="px-3 py-1 border rounded"
           >
-            {queryParams.order === "asc" ? "↑" : "↓"}
+            {queryParams.order === "asc" ? "\u2191" : "\u2193"}
           </button>
         </div>
 
-        <div>
+        <div data-testid="filter-genre">
           <Select
-            data-testid="filter-genre"
             id="genre-select"
             instanceId="genre-select"
             options={genreOptions}
