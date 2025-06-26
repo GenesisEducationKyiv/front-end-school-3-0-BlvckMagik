@@ -25,7 +25,8 @@
     "react-select": "^5.10.1",
     "shadcn-ui": "^0.9.5",
     "wavesurfer.js": "^7.9.4",
-    "zod": "^3.24.3"
+    "zod": "^3.24.3",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

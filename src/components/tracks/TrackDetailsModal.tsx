@@ -21,7 +21,7 @@ export default function TrackDetailsModal({
         <div className="space-y-4">
           <div className="flex items-center gap-4 mb-4">
             <Image
-              src={track.coverImage ?? "/default-cover.webp"}
+              src={track.coverImage && track.coverImage.trim() !== "" ? track.coverImage : "/default-cover.webp"}
               alt={track.title}
               width={96}
               height={96}

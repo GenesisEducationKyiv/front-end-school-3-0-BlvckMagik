@@ -4,12 +4,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type Track, type TrackFormData, trackFormSchema } from "@/lib/validators";
-import { trackApiClient, getErrorMessage } from "@/lib/api-client";
-import { useTracks } from "@/contexts/TracksContext";
+import { useUpdateTrack, useUploadAudioFile, useGenres } from "@/hooks/useTracks";
 import Select from "react-select";
-import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
-import { useQueryClient } from "@tanstack/react-query";
-import { useGenres } from "@/lib/hooks/useGenres";
+import { useAudioPlayerStore } from "@/stores/audioPlayerStore";
 
 interface EditTrackModalProps {
   isOpen: boolean;
@@ -24,12 +21,13 @@ export default function EditTrackModal({
 }: EditTrackModalProps): React.JSX.Element | null {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const { updateTrack } = useTracks();
-  const { currentTrack, stopPlayback } = useAudioPlayer();
-  const queryClient = useQueryClient();
+  
+  const updateTrackMutation = useUpdateTrack();
+  const uploadAudioFileMutation = useUploadAudioFile();
+  const { currentTrack, stopPlayback } = useAudioPlayerStore();
   const { data: genreOptions = [], isLoading: genresLoading } = useGenres();
+  
   const {
     register,
     handleSubmit,
@@ -45,8 +43,6 @@ export default function EditTrackModal({
       coverImage: track.coverImage || "",
     },
   });
-
-
 
   const validateAudioFile = (file: File | null): boolean => {
     if (!file) return true;
@@ -75,48 +71,25 @@ export default function EditTrackModal({
   const onSubmit = async (data: TrackFormData): Promise<void> => {
     if (!validateAudioFile(selectedFile)) return;
 
-    setIsSubmitting(true);
     setSubmitError(null);
 
     if (currentTrack?.track.id === track.id) {
       stopPlayback();
     }
 
-    const updateResult = await trackApiClient.updateTrack(track.id, data);
-    
-    if (updateResult.isErr()) {
-      console.error("Failed to update track:", getErrorMessage(updateResult.error));
-      setSubmitError(`Failed to update track: ${getErrorMessage(updateResult.error)}`);
-      setIsSubmitting(false);
-      return;
-    }
+    try {
+      await updateTrackMutation.mutateAsync({ id: track.id, data });
 
-    let updatedTrack = updateResult.value;
-
-    if (selectedFile) {
-      const uploadResult = await trackApiClient.uploadFile(track.id, selectedFile);
-      
-      if (uploadResult.isErr()) {
-        console.error("Failed to upload file:", getErrorMessage(uploadResult.error));
-        setSubmitError(`Failed to upload file: ${getErrorMessage(uploadResult.error)}`);
-        setIsSubmitting(false);
-        return;
+      if (selectedFile) {
+        await uploadAudioFileMutation.mutateAsync({ id: track.id, file: selectedFile });
       }
-      
-      const refreshResult = await trackApiClient.getTracks({ page: 1, limit: 1 });
-      if (refreshResult.isOk()) {
-        const refreshedTrack = refreshResult.value.data.find(refreshedItem => refreshedItem.id === track.id);
-        if (refreshedTrack) {
-          updatedTrack = refreshedTrack;
-        }
-      }
-    }
 
-    updateTrack(updatedTrack);
-    void queryClient.invalidateQueries({ queryKey: ["tracks"] });
-    setSubmitError(null);
-    onClose();
-    setIsSubmitting(false);
+      setSubmitError(null);
+      onClose();
+    } catch (error) {
+      console.error("Failed to update track:", error);
+      setSubmitError(`Failed to update track: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   if (!isOpen) return null;
@@ -254,11 +227,11 @@ export default function EditTrackModal({
             <button
               data-testid="submit-button"
               type="submit"
-              disabled={isSubmitting || !!fileError}
-              aria-disabled={isSubmitting || !!fileError}
+              disabled={updateTrackMutation.isPending || uploadAudioFileMutation.isPending || !!fileError}
+              aria-disabled={updateTrackMutation.isPending || uploadAudioFileMutation.isPending || !!fileError}
               className="px-4 py-2 bg-blue-500 text-white rounded"
             >
-              {isSubmitting ? (
+              {updateTrackMutation.isPending || uploadAudioFileMutation.isPending ? (
                 <span data-testid="loading-indicator">Saving...</span>
               ) : (
                 "Save"

@@ -13,7 +13,6 @@ import {
 } from "@/lib/validators";
 import { isAxiosError, assertExists } from "@/lib/type-guards";
 
-// API Endpoints
 const ENDPOINTS = {
   TRACKS: "/tracks",
   GENRES: "/genres",
@@ -23,7 +22,6 @@ const ENDPOINTS = {
   FILES: (fileName: string) => `/files/${fileName}`,
 } as const;
 
-// Error Types
 export interface NetworkError {
   type: "network";
   message: string;

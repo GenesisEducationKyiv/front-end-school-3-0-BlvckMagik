@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { debounce } from "lodash";
-import { type Track, type TrackQueryParams } from "@/lib/validators";
-import { trackApiClient, getErrorMessage } from "@/lib/api-client";
+import { type TrackQueryParams } from "@/lib/validators";
 import TrackItem from "@/components/tracks/TrackItem";
 import Select from "react-select";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import { useGenres } from "@/lib/hooks/useGenres";
+import { useTracks, useGenres } from "@/hooks/useTracks";
 
 interface TracksListProps {
   onCreateTrackClick: () => void;
@@ -26,18 +24,7 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
   });
 
   const { data: genreOptions = [], isLoading: genresLoading } = useGenres();
-
-  const { data: tracksData, isLoading } = useQuery({
-    queryKey: ["tracks", queryParams],
-    queryFn: async () => {
-      const result = await trackApiClient.getTracks(queryParams);
-      if (result.isOk()) {
-        return { data: result.value };
-      }
-      throw new Error(getErrorMessage(result.error));
-    },
-    staleTime: 1000 * 60,
-  });
+  const { data: tracksData, isLoading } = useTracks(queryParams);
 
   const debouncedSearch = useMemo(
     () =>
@@ -133,17 +120,17 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
         </div>
       ) : (
         <div className="flex flex-col gap-8">
-          {tracksData?.data.data.map((track: Track) => (
+          {tracksData?.data.map((track) => (
             <TrackItem key={track.id} track={track} />
           ))}
         </div>
       )}
-      {tracksData?.data.meta && (
+      {tracksData?.meta && (
         <div
           data-testid="pagination"
           className="flex justify-center gap-2 mt-4"
         >
-          {Array.from({ length: tracksData.data.meta.totalPages }, (_, i) => (
+          {Array.from({ length: tracksData.meta.totalPages }, (_, i) => (
             <button
               key={i + 1}
               onClick={() =>

@@ -7,10 +7,9 @@ import Image from "next/image";
 import { trackApiClient, getErrorMessage } from "@/lib/api-client";
 import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { useAudioPlayerStore } from "@/stores/audioPlayerStore";
 import TrackDetailsModal from "@/components/tracks/TrackDetailsModal";
-import { useTracks } from "@/contexts/TracksContext";
-import { useQueryClient } from "@tanstack/react-query";
+import { useDeleteTrack } from "@/hooks/useTracks";
 import { isEventTargetElement } from "@/lib/type-guards";
 
 interface TrackItemProps {
@@ -22,18 +21,18 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  
   const {
     setCurrentTrack,
     currentTrack,
     isPlaying,
     setIsPlaying,
     stopPlayback,
-  } = useAudioPlayer();
-  const { deleteTrack } = useTracks();
-  const queryClient = useQueryClient();
+  } = useAudioPlayerStore();
+  
+  const deleteTrackMutation = useDeleteTrack();
 
   const isCurrentTrack = currentTrack?.track.id === track.id;
 
@@ -88,24 +87,18 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
       return;
     }
 
-    setIsDeleting(true);
     setDeleteError(null);
     
     if (currentTrack?.track.id === track.id) {
       stopPlayback();
     }
     
-    const result = await trackApiClient.deleteTrack(track.id);
-    
-    if (result.isOk()) {
-      deleteTrack(track.id);
-      void queryClient.invalidateQueries({ queryKey: ["tracks"] });
-    } else {
-      console.error("Failed to delete track:", getErrorMessage(result.error));
-      setDeleteError(`Failed to delete track: ${getErrorMessage(result.error)}`);
+    try {
+      await deleteTrackMutation.mutateAsync(track.id);
+    } catch (error) {
+      console.error("Failed to delete track:", error);
+      setDeleteError(`Failed to delete track: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-    
-    setIsDeleting(false);
   };
 
   return (
@@ -196,8 +189,8 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
         <div className="relative flex" ref={menuRef}>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            disabled={isDeleting}
-            aria-disabled={isDeleting}
+            disabled={deleteTrackMutation.isPending}
+            aria-disabled={deleteTrackMutation.isPending}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <EllipsisVerticalIcon className="w-5 h-5 text-gray-600" />
@@ -232,11 +225,11 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
                 onClick={() => {
                   void handleDelete();
                 }}
-                disabled={isDeleting}
-                aria-disabled={isDeleting}
+                disabled={deleteTrackMutation.isPending}
+                aria-disabled={deleteTrackMutation.isPending}
                 className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition-colors"
               >
-                {isDeleting ? (
+                {deleteTrackMutation.isPending ? (
                   <span data-testid="loading-indicator">Deleting...</span>
                 ) : (
                   "Delete"
