@@ -4,11 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type TrackFormData, trackFormSchema } from "@/lib/validators";
-import { trackApiClient, getErrorMessage } from "@/lib/api-client";
-import { useTracks } from "@/contexts/TracksContext";
+import { useCreateTrack, useUploadAudioFile, useGenres } from "@/hooks/useTracks";
 import Select from "react-select";
-import { useQueryClient } from "@tanstack/react-query";
-import { useGenres } from "@/lib/hooks/useGenres";
 
 interface CreateTrackModalProps {
   isOpen: boolean;
@@ -21,10 +18,10 @@ export default function CreateTrackModal({
 }: CreateTrackModalProps): React.JSX.Element | null {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const { addTrack } = useTracks();
-  const queryClient = useQueryClient();
+  
+  const createTrackMutation = useCreateTrack();
+  const uploadAudioFileMutation = useUploadAudioFile();
   const { data: genreOptions = [], isLoading: genresLoading } = useGenres();
 
   const {
@@ -71,48 +68,23 @@ export default function CreateTrackModal({
   const onSubmit = async (data: TrackFormData): Promise<void> => {
     if (!validateAudioFile(selectedFile)) return;
 
-    setIsSubmitting(true);
     setSubmitError(null);
 
-    const createResult = await trackApiClient.createTrack(data);
-    
-    if (createResult.isErr()) {
-      console.error("Failed to create track:", getErrorMessage(createResult.error));
-      setSubmitError(`Failed to create track: ${getErrorMessage(createResult.error)}`);
-      setIsSubmitting(false);
-      return;
-    }
+    try {
+      const newTrack = await createTrackMutation.mutateAsync(data);
 
-    let newTrack = createResult.value;
-
-    if (selectedFile) {
-      const uploadResult = await trackApiClient.uploadFile(newTrack.id, selectedFile);
-      
-      if (uploadResult.isErr()) {
-        console.error("Failed to upload file:", getErrorMessage(uploadResult.error));
-        setSubmitError(`Failed to upload file: ${getErrorMessage(uploadResult.error)}`);
-        setIsSubmitting(false);
-        return;
+      if (selectedFile) {
+        await uploadAudioFileMutation.mutateAsync({ id: newTrack.id, file: selectedFile });
       }
-      
-      const refreshResult = await trackApiClient.getTracks({ page: 1, limit: 1 });
-      if (refreshResult.isErr()) {
-        console.warn("Failed to refresh track data");
-      } else {
-        const refreshedTrack = refreshResult.value.data.find(track => track.id === newTrack.id);
-        if (refreshedTrack) {
-          newTrack = refreshedTrack;
-        }
-      }
-    }
 
-    addTrack(newTrack);
-    void queryClient.invalidateQueries({ queryKey: ["tracks"] });
-    reset();
-    setSelectedFile(null);
-    setSubmitError(null);
-    onClose();
-    setIsSubmitting(false);
+      reset();
+      setSelectedFile(null);
+      setSubmitError(null);
+      onClose();
+    } catch (error) {
+      console.error("Failed to create track:", error);
+      setSubmitError(`Failed to create track: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   if (!isOpen) return null;
@@ -245,11 +217,11 @@ export default function CreateTrackModal({
             <button
               data-testid="submit-button"
               type="submit"
-              disabled={isSubmitting || !!fileError}
-              aria-disabled={isSubmitting || !!fileError}
+              disabled={createTrackMutation.isPending || uploadAudioFileMutation.isPending || !!fileError}
+              aria-disabled={createTrackMutation.isPending || uploadAudioFileMutation.isPending || !!fileError}
               className="px-4 py-2 bg-blue-500 text-white rounded"
             >
-              {isSubmitting ? (
+              {createTrackMutation.isPending || uploadAudioFileMutation.isPending ? (
                 <span data-testid="loading-indicator">Creating...</span>
               ) : (
                 "Create"

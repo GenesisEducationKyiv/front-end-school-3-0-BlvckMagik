@@ -2,26 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
-import { useAudioContextManager } from "@/contexts/AudioContextProvider";
+import { useAudioContextStore } from "@/stores/audioContextStore";
+import { useAudioPlayerStore } from "@/stores/audioPlayerStore";
 
-interface AudioPlayerProps {
-  audioUrl: string;
-  track: {
-    title: string;
-    artist: string;
-    coverImage?: string;
-    id: string;
-  };
-  isPlaying: boolean;
-  setIsPlaying: (isPlaying: boolean) => void;
-}
-
-export default function AudioPlayer({
-  audioUrl,
-  track,
-  isPlaying,
-  setIsPlaying,
-}: AudioPlayerProps): React.JSX.Element {
+export default function AudioPlayer(): React.JSX.Element | null {
+  const { currentTrack, isPlaying, setIsPlaying } = useAudioPlayerStore();
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -30,7 +15,7 @@ export default function AudioPlayer({
   const mobileProgressRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
   
-  const audioContext = useAudioContextManager();
+  const audioContext = useAudioContextStore();
 
   const initializeAudioContext = () => {
     if (!audioRef.current) return;
@@ -82,15 +67,28 @@ export default function AudioPlayer({
   };
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      setCurrentTime(0);
-      setDuration(0);
-    }
-  }, [audioUrl, track.id]);
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    setCurrentTime(audio.currentTime);
+
+    return () => {
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+    };
+  }, [currentTrack?.audioUrl]);
 
   useEffect(() => {
-    if (!audioRef.current || !audioUrl) return;
+    if (audioRef.current && currentTrack) {
+      audioRef.current.currentTime = 0;
+      setDuration(0);
+    }
+  }, [currentTrack?.audioUrl, currentTrack?.track.id]);
+
+  useEffect(() => {
+    if (!audioRef.current || !currentTrack?.audioUrl) return;
 
     const handleCanPlay = () => {
       initializeAudioContext();
@@ -119,7 +117,7 @@ export default function AudioPlayer({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [audioUrl]);
+  }, [currentTrack?.audioUrl]);
 
   useEffect(() => {
     const analyser = audioContext.getAnalyser();
@@ -134,19 +132,6 @@ export default function AudioPlayer({
       }
     };
   }, [isPlaying]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-
-    audio.addEventListener("timeupdate", handleTimeUpdate);
-
-    return () => {
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
-    };
-  }, []);
 
   useEffect(() => {
     if (!audioRef.current) return;
@@ -169,7 +154,13 @@ export default function AudioPlayer({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [audioContext]);
+  }, []);
+
+  if (!currentTrack) {
+    return null;
+  }
+
+  const { audioUrl, track } = currentTrack;
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
