@@ -2,13 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { type Track } from "@/lib/validators";
-import EditTrackModal from "@/components/tracks/EditTrackModal";
+import { LazyEditTrackModal, LazyTrackDetailsModal } from "@/components/tracks/LazyModals";
+import { Spinner } from "@/components/ui";
 import Image from "next/image";
 import { trackApiClient, getErrorMessage } from "@/lib/api-client";
 import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
-import TrackDetailsModal from "@/components/tracks/TrackDetailsModal";
 import { useTracks } from "@/contexts/TracksContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { isEventTargetElement } from "@/lib/type-guards";
@@ -170,9 +170,9 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
             {isLoading ? (
               <div
                 data-testid="loading-indicator"
-                className="h-8 flex items-center"
+                className="h-12 flex items-center justify-center"
               >
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-300" />
+                <Spinner size="sm" color="gray" />
               </div>
             ) : (
               <button
@@ -237,7 +237,10 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
                 className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition-colors"
               >
                 {isDeleting ? (
-                  <span data-testid="loading-indicator">Deleting...</span>
+                  <span data-testid="loading-indicator" className="flex items-center gap-2">
+                    <Spinner size="sm" color="gray" />
+                    Видалення...
+                  </span>
                 ) : (
                   "Delete"
                 )}
@@ -247,13 +250,13 @@ export default function TrackItem({ track }: TrackItemProps): React.JSX.Element 
         </div>
       </div>
 
-      <EditTrackModal
+      <LazyEditTrackModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         track={track}
       />
 
-      <TrackDetailsModal
+      <LazyTrackDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         track={track}

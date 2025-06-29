@@ -9,6 +9,7 @@ import TrackItem from "@/components/tracks/TrackItem";
 import Select from "react-select";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { useGenres } from "@/lib/hooks/useGenres";
+import { TrackListSkeleton } from "@/components/ui";
 
 interface TracksListProps {
   onCreateTrackClick: () => void;
@@ -125,11 +126,8 @@ export default function TracksList({ onCreateTrackClick }: TracksListProps) {
         </div>
       </div>
       {isLoading ? (
-        <div data-testid="loading-tracks" className="flex justify-center py-8">
-          <div
-            data-testid="loading-indicator"
-            className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"
-          />
+        <div data-testid="loading-tracks">
+          <TrackListSkeleton />
         </div>
       ) : (
         <div className="flex flex-col gap-8">

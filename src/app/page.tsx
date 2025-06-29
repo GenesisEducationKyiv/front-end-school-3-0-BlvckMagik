@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import CreateTrackModal from "@/components/tracks/CreateTrackModal";
+import { LazyCreateTrackModal } from "@/components/tracks/LazyModals";
 import TracksList from "@/components/tracks/TrackList";
 
 export default function TracksPage(): React.JSX.Element {
@@ -15,7 +15,7 @@ export default function TracksPage(): React.JSX.Element {
 
       <TracksList onCreateTrackClick={() => setIsCreateModalOpen(true)} />
 
-      <CreateTrackModal
+      <LazyCreateTrackModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       />
