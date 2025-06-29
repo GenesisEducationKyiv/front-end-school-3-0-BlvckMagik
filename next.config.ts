@@ -10,6 +10,25 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  productionBrowserSourceMaps: true,
+  compress: true,
+  poweredByHeader: false,
+  
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: [
+      "@heroicons/react",
+      "@headlessui/react",
+      "react-select",
+      "lodash",
+    ],
+  },
+
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? {
+      exclude: ["error", "warn"],
+    } : false,
+  },
 };
 
 export default nextConfig;

@@ -1,6 +1,6 @@
 "use client";
 
-import AudioPlayer from "@/components/tracks/AudioPlayer";
+import { LazyAudioPlayer } from "@/components/tracks/LazyAudioPlayer";
 import { createContext, useContext, useState } from "react";
 import type { AudioPlayerState } from "@/lib/validators";
 
@@ -41,7 +41,7 @@ export function AudioPlayerProvider({
     >
       {children}
       {currentTrack && (
-        <AudioPlayer
+        <LazyAudioPlayer
           audioUrl={currentTrack.audioUrl}
           track={currentTrack.track}
           isPlaying={isPlaying}
