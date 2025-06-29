@@ -3,6 +3,7 @@
 import { useState } from "react";
 import CreateTrackModal from "@/components/tracks/CreateTrackModal";
 import TracksList from "@/components/tracks/TrackList";
+import ActiveTrackDisplay from "@/components/ActiveTrackDisplay";
 
 export default function TracksPage(): React.JSX.Element {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -12,6 +13,11 @@ export default function TracksPage(): React.JSX.Element {
       <h1 className="text-3xl font-bold mb-8" data-testid="tracks-header">
         Tracks
       </h1>
+
+      {/* Active Track Display */}
+      <div className="mb-8">
+        <ActiveTrackDisplay />
+      </div>
 
       <TracksList onCreateTrackClick={() => setIsCreateModalOpen(true)} />
 
