@@ -59,6 +59,37 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## CI/CD Pipeline
+
+Цей проект використовує автоматизований CI/CD процес з GitHub Actions:
+
+### Перевірки при кожному PR:
+- ✅ ESLint перевірка коду
+- ✅ TypeScript перевірка типів  
+- ✅ Збірка додатку
+- ✅ Збереження артефактів
+
+### Docker:
+- 🐳 Багатоетапний Dockerfile для оптимізації розміру
+- 🐳 Автоматична збірка та публікація Docker образів
+- 🐳 Docker Compose для локальної розробки
+
+### Локальне тестування:
+```bash
+pnpm lint          # ESLint перевірка
+pnpm type-check    # TypeScript перевірка
+pnpm build         # Збірка додатку
+```
+
+### Docker команди:
+```bash
+docker-compose up --build  # Локальна розробка
+docker build -t music-app . # Збірка образу
+docker run -p 3000:3000 music-app # Запуск контейнера
+```
+
+Детальна документація: [docs/CI-CD.md](docs/CI-CD.md)
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.

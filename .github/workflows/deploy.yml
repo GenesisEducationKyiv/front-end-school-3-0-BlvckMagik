@@ -1,0 +1,24 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types:
+      - completed
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production..."
+        echo "This is where you would add your deployment logic"
+        echo "For example:"
+        echo "- Deploy to Vercel"
+        echo "- Deploy to AWS ECS"
+        echo "- Deploy to Google Cloud Run"
+        echo "- Deploy to Azure Container Instances"
