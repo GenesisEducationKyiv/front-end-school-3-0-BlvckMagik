@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.2",
@@ -15,6 +17,7 @@
     "@hookform/resolvers": "^5.0.1",
     "@tanstack/react-query": "^5.74.4",
     "axios": "^1.8.4",
+    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.21",
     "neverthrow": "^8.2.0",
@@ -24,12 +27,22 @@
     "react-hook-form": "^7.55.0",
     "react-select": "^5.10.1",
     "shadcn-ui": "^0.9.5",
+    "tailwind-merge": "^3.3.1",
     "wavesurfer.js": "^7.9.4",
     "zod": "^3.24.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@eslint/js": "^9.27.0",
+    "@storybook/addon-controls": "^9.0.8",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/addon-interactions": "^8.6.14",
+    "@storybook/addon-links": "^8.6.14",
+    "@storybook/addon-themes": "^8.6.14",
+    "@storybook/blocks": "^8.6.14",
+    "@storybook/react": "^8.6.14",
+    "@storybook/react-vite": "^8.6.14",
+    "@storybook/testing-library": "^0.2.2",
     "@tailwindcss/postcss": "^4.1.4",
     "@types/lodash": "^4.17.16",
     "@types/node": "^20",
@@ -41,6 +54,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
     "postcss": "^8.5.3",
+    "storybook": "^8.6.14",
     "tailwindcss": "^4.1.4",
     "typescript": "^5.0.0"
   }

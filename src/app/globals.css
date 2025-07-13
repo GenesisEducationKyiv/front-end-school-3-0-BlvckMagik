@@ -1,7 +1,8 @@
+@import "tailwindcss";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "tailwindcss";
+
 
 /*
   1. Use a more-intuitive box-sizing model.
@@ -156,6 +157,30 @@ h6 {
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
+
+    --surface: 240 10% 3.9%;
+    --surface-container: 240 10% 6.9%;
+    --surface-container-hover: 240 10% 9.9%;
+    --surface-container-pressed: 240 10% 12.9%;
+    
+    --outline: 240 3.7% 15.9%;
+    --error: 0 84% 60%;
+    
+    --on-primary: 0 0% 98%;
+    --on-secondary: 0 0% 98%;
+    --on-surface: 0 0% 98%;
+    --on-surface-variant: 240 5% 64.9%;
+    
+    --primary-hover: 240 5.9% 15%;
+    --primary-pressed: 240 5.9% 20%;
+    --primary-container: 240 5.9% 15.9%;
+    --primary-container-pressed: 240 5.9% 20.9%;
+    --on-primary-container: 0 0% 98%;
+    
+    --secondary-container: 240 3.7% 20.9%;
+    --secondary-container-hover: 240 3.7% 25.9%;
+    --secondary-container-pressed: 240 3.7% 30.9%;
+    --on-secondary-container: 0 0% 98%;
   }
 
   .dark {
@@ -167,6 +192,30 @@ h6 {
     --secondary-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
+    
+    --surface: 240 10% 3.9%;
+    --surface-container: 240 10% 6.9%;
+    --surface-container-hover: 240 10% 9.9%;
+    --surface-container-pressed: 240 10% 12.9%;
+    
+    --outline: 240 3.7% 15.9%;
+    --error: 0 84% 60%;
+    
+    --on-primary: 240 5.9% 10%;
+    --on-secondary: 240 3.7% 15.9%;
+    --on-surface: 0 0% 98%;
+    --on-surface-variant: 240 5% 64.9%;
+    
+    --primary-hover: 0 0% 90%;
+    --primary-pressed: 0 0% 85%;
+    --primary-container: 0 0% 15.9%;
+    --primary-container-pressed: 0 0% 20.9%;
+    --on-primary-container: 0 0% 98%;
+    
+    --secondary-container: 240 3.7% 20.9%;
+    --secondary-container-hover: 240 3.7% 25.9%;
+    --secondary-container-pressed: 240 3.7% 30.9%;
+    --on-secondary-container: 0 0% 98%;
   }
 }
 

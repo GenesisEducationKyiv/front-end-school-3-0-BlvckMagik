@@ -13,6 +13,14 @@ export default function Header() {
           >
             Music Player
           </Link>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/material-demo"
+              className="text-sm text-foreground/80 hover:text-foreground transition-colors"
+            >
+              Material 3 Demo
+            </Link>
+          </div>
         </nav>
       </div>
     </header>
